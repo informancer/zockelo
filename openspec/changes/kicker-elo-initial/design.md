@@ -125,13 +125,40 @@ Both paths converge at `PlayerActivated`.
 
 **Rationale:** Human-readable, easy to share, no subdomain DNS complexity for self-hosting.
 
+### 10a. Custom domain routing: Caddy path rewrite (Option A)
+
+**Decision:** When a tenant has a `custom_domain` configured, Caddy rewrites the path by prepending the tenant slug before forwarding to the application. The application router is unchanged.
+
+```caddy
+foosball.acme.com {
+    rewrite * /acme{uri}
+    reverse_proxy app:4000 {
+        header_up X-Forwarded-Host {host}
+    }
+}
+```
+
+`foosball.acme.com/games` → Phoenix receives `/acme/games`. Phoenix routes normally. `X-Forwarded-Host` is used only for URL generation (magic links, CSP `connect-src`) — not for routing. `TRUST_PROXY_HEADERS=true` must be set in `.env`.
+
+`foosball.acme.com/admin` → Caddy rewrites to `/acme/admin` → tenant admin panel. The super admin panel at `/admin` is unreachable via any custom domain, which is the desired behaviour.
+
+**Rationale:** Zero application routing changes. No per-request DB lookup. Super admin panel is naturally isolated. At this scale (self-hosted, small operator audience, slugs are immutable), the one-time cost of knowing the slug when writing the Caddy block is acceptable and is made mechanical by the operator guide snippet.
+
+**Consequences:**
+- Tenant slugs SHOULD be treated as immutable after creation. If a slug ever changes, the operator must update the Caddy block manually.
+- The operator must update their Caddy config each time a tenant adds or removes a custom domain. The operator guide documents this as a routine step.
+- `X-Forwarded-Host` must only be trusted when `TRUST_PROXY_HEADERS=true` is set (security spec).
+
+**Alternatives considered:**
+- App-level slug resolution (plug intercepts request, looks up tenant by `X-Forwarded-Host`, rewrites path): no slug knowledge in Caddy, but requires a DB lookup on every request and non-trivial Phoenix path rewriting. Rejected at this scale.
+
 ### 11. Observability stack
 
 **Decision:** PromEx (Prometheus metrics) + Prometheus + Grafana + GlitchTip + structured JSON logging (`logger_json`).
 
 **Rationale:** All components are free and open source. GlitchTip is chosen over self-hosted Sentry — it is Sentry-SDK-compatible (uses the same `sentry` hex package), significantly lighter (~300MB vs ~2GB+ for Sentry), and sufficient for this scale. PromEx integrates directly with Phoenix/Ecto/Oban telemetry with minimal configuration.
 
-**Deployment:** Docker Compose with three profiles — default (app + postgres), monitoring (+ prometheus + grafana), full (+ glitchtip + redis). Grafana dashboards are provisioned automatically. Operators need only copy `.env.example`, fill required values, and run `docker-compose up`.
+**Deployment:** Docker Compose with three profiles — default (app + postgres), monitoring (+ prometheus + grafana), full (+ glitchtip + redis). Grafana dashboards are provisioned automatically. A standalone `setup.sh` script handles first-time setup (downloads `docker-compose.yml`, generates secrets, prompts for required config, writes `.env`, starts containers) and upgrades (`setup.sh --upgrade`). Grafana admin credentials and GlitchTip project/DSN are configured automatically by `setup.sh` — no manual first-login steps required.
 
 **Alternatives considered:**
 - Self-hosted Sentry: too resource-heavy (~2GB RAM) for a 2GB VPS target.
@@ -170,17 +197,19 @@ Full (+ glitchtip + redis):  ~1.8GB RAM
 - **2v1 Elo accuracy** → No handicap correction; ratings self-correct over time if one side is structurally stronger. Accepted trade-off per product decision.
 - **Single Postgres instance** → No read replicas at initial scale. Acceptable for ~20 players/tenant.
 - **Single-node PubSub** → PG2 adapter works only within one Erlang node. Multi-instance deployment breaks real-time leaderboard updates. Operators must not load-balance without switching to `Phoenix.PubSub.Redis`. Documented in operator guide.
-- **Projection rebuild during live traffic** → Rebuild runs in a separate process using existing read model until complete. No user impact at this scale.
+- **Projection rebuild requires downtime** → A full rebuild (drop read model tables, replay all events) cannot safely run in parallel with live traffic without a shadow-table swap, which adds significant complexity not warranted at this scale. The documented procedure is: enable maintenance mode, stop the app, drop and replay, restart. Normal projection *catch-up* (a lagging handler replaying missed events) does run in parallel with no user impact — this is distinct from a full rebuild.
 - **game_rounds position columns (4 indexes)** → Four separate indexes on front/back columns. Alternative: denormalise player-game participation into a separate read model for profile queries. Deferred — evaluate if query performance degrades at scale.
 
 ## Migration Plan
 
 Greenfield — no migration required. Deployment steps:
-1. Clone repo, configure environment (Postgres URL, master encryption key, `SMTP_HOST`, `SMTP_FROM`, and other vars per `.env.example`)
-2. Run `mix ecto.setup` (creates DB, runs migrations)
-3. Run `mix zockelo.create_super_admin --email <email>` to bootstrap super admin
+1. Download and inspect `setup.sh`; run it and answer prompts (host, SMTP config, deployment profile)
+2. `setup.sh` generates secrets, writes `.env`, starts containers; DB migrations run automatically on app startup
+3. Run `mix zockelo.create_super_admin --email <email>` (printed by `setup.sh` at the end) to bootstrap the super admin
 4. Super admin logs in via magic link, creates first tenant, assigns tenant admin
 5. Tenant admin onboards players via invite
+
+Upgrades: run `setup.sh --upgrade` — pulls new image, prompts for any new env vars, restarts containers.
 
 Rollback: restore Postgres backup. No external state.
 

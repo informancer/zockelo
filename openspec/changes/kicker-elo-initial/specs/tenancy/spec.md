@@ -12,11 +12,11 @@ The system SHALL provide a mix task `zockelo.create_super_admin` that creates th
 - **THEN** the system prints a warning and exits without creating a duplicate
 
 ### Requirement: Super admin panel shows a getting-started prompt when no tenants exist
-When a super admin logs in and no tenants exist yet, the `/admin` panel SHALL display a prominent call-to-action: *"No workspaces yet — create your first one"* with a direct link to the create-tenant form. System configuration sections are still accessible but secondary.
+When a super admin logs in and no tenants exist yet, the `/admin` panel SHALL display a prominent call-to-action: *"No leagues yet — create your first one"* with a direct link to the create-tenant form. System configuration sections are still accessible but secondary.
 
 #### Scenario: Super admin sees getting-started prompt with no tenants
 - **WHEN** a super admin visits `/admin` and no tenants have been created yet
-- **THEN** the page shows a prominent "Create your first workspace" call-to-action above the tenant list (which is empty)
+- **THEN** the page shows a prominent "Create your first league" call-to-action above the tenant list (which is empty)
 
 ### Requirement: Super admin can create tenants directly
 When the system is configured in direct-creation mode, the super admin SHALL be able to create a tenant by providing a name and slug. The first tenant admin SHALL be designated at creation time, either by inviting someone by email (who need not have an existing account) or by selecting an existing player.
@@ -32,6 +32,10 @@ When the system is configured in direct-creation mode, the super admin SHALL be 
 #### Scenario: Duplicate slug rejected
 - **WHEN** super admin attempts to create a tenant with a slug already in use
 - **THEN** the system rejects the request with a validation error
+
+#### Scenario: Tenant slug is immutable after creation
+- **WHEN** a super admin or tenant admin attempts to change a tenant's slug
+- **THEN** the slug field is not editable; no mechanism exists in the UI to change it after creation. This is intentional: slugs are embedded in Caddy custom domain rewrite rules, bookmarks, and shared URLs — changing them silently would break all of these.
 
 ### Requirement: Tenant creation via request and approval flow
 When the system is configured in request-approval mode, any user SHALL be able to submit a tenant request. The super admin SHALL be able to approve or reject the request. The requester SHALL receive an email notification of the decision in both cases.
@@ -74,12 +78,41 @@ Each tenant SHALL have the following configurable settings stored in tenant conf
 - `default_locale` (enum: `en` | `de`, default: `en`)
 - `deletion_grace_period_hours` (integer, default: 48)
 - `app_name` (string, optional: displayed in nav, page titles, PWA manifest, and email From display name; defaults to "Zockelo" if unset)
-- `custom_domain` (string, optional: fully-qualified domain name, e.g. `foosball.acme.com`; when set, used for magic link URLs and other absolute URL generation)
+- `custom_domain` (string, optional: fully-qualified domain name, e.g. `foosball.acme.com`; when set, used for magic link URLs and other absolute URL generation; must be unique across all tenants)
 - `tenant_creation_mode` (system-level, not per-tenant: `direct` | `request_approval`)
 
 #### Scenario: Tenant admin updates config
 - **WHEN** a tenant admin saves updated tenant configuration
 - **THEN** the new settings take effect for all subsequent games logged in that tenant
+
+#### Scenario: Duplicate custom_domain rejected
+- **WHEN** a tenant admin enters a `custom_domain` value already in use by another tenant
+- **THEN** the form returns a validation error and the value is not saved
+
+### Requirement: Custom domain field displays operator setup notice
+The `custom_domain` field in the tenant config form SHALL display a persistent inline notice explaining that entering a domain here does not make it active on its own. The notice SHALL state:
+1. A DNS record (A or CNAME) must be created pointing the domain at the server's IP address
+2. The server operator must update the Caddy configuration to route the domain to this league before it becomes active
+3. A link to the operator guide section covering custom domain setup
+
+The notice is informational and SHALL be shown regardless of whether a value is currently set.
+
+#### Scenario: Config form shows custom domain setup notice
+- **WHEN** a tenant admin views the tenant config form
+- **THEN** the custom_domain field is accompanied by a notice explaining the DNS and operator Caddy steps required
+
+### Requirement: Magic link base URL follows custom_domain transitions
+When `custom_domain` is set on a tenant, all newly generated magic links (login, activation, unsubscribe) SHALL use `custom_domain` as the base URL. Previously issued links that used the old base URL remain valid as long as that URL continues to resolve to the application.
+
+When `custom_domain` is cleared, newly generated links revert to using `PHX_HOST` as the base URL. No existing links are invalidated by the change.
+
+#### Scenario: Magic links use custom domain once set
+- **WHEN** a tenant has `custom_domain` set and a magic link is generated for a player in that tenant
+- **THEN** the link URL uses `custom_domain` as the base (e.g. `https://foosball.acme.com/acme/auth/...`)
+
+#### Scenario: Magic links revert to PHX_HOST when custom domain is cleared
+- **WHEN** a tenant admin clears the `custom_domain` field and a magic link is subsequently generated
+- **THEN** the link URL uses `PHX_HOST` as the base
 
 ### Requirement: Multiple tenant admins are supported
 A tenant SHALL support multiple users with the tenant admin role. The super admin SHALL be able to grant or revoke the tenant admin role for any player within any tenant. Tenant admins SHALL be able to grant or revoke the tenant admin role for other players within their own tenant.

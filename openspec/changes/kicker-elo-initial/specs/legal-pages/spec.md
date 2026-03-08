@@ -117,7 +117,7 @@ This satisfies the Art. 13 requirement to provide information "at the time perso
 
 #### Scenario: Privacy summary shown on first activation — tenant admin
 - **WHEN** a newly invited tenant admin clicks their first magic link
-- **THEN** the activation screen displays the privacy summary; after dismissal the tenant admin is redirected to `/:tenant_slug/admin` with a welcome banner: *"Welcome! Start by setting up your workspace — configure your imprint and invite your first players."*
+- **THEN** the activation screen displays the privacy summary; after dismissal the tenant admin is redirected to `/:tenant_slug/admin` with a welcome banner: *"Welcome! Start by setting up your league — configure your imprint and invite your first players."*
 
 #### Scenario: Privacy summary not shown on subsequent logins
 - **WHEN** an already-activated player authenticates via magic link

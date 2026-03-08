@@ -259,23 +259,53 @@ The Mix release configuration SHALL set an appropriate `:shutdown` timeout to ac
 - **WHEN** the container receives SIGTERM while an HTTP request is being processed
 - **THEN** the request is allowed to complete before the listener is closed
 
+### Requirement: Custom domain routing uses Caddy path rewrite
+When a tenant has a `custom_domain` configured, Caddy SHALL prepend the tenant slug to the request path before forwarding to the application. The Phoenix application router requires no changes — it continues to route on `/:tenant_slug/...` paths as normal.
+
+The Caddy block for a custom domain SHALL follow this pattern (where `{slug}` is the tenant's slug):
+
+```caddy
+foosball.acme.com {
+    rewrite * /{slug}{uri}
+    reverse_proxy app:4000 {
+        header_up X-Forwarded-Host {host}
+    }
+}
+```
+
+`X-Forwarded-Host` is passed so the application can use the custom domain for URL generation (magic links, CSP). `TRUST_PROXY_HEADERS=true` must be set in `.env` for the application to honour this header (security spec).
+
+`{custom_domain}/admin` routes to the tenant admin panel (Caddy rewrites it to `/{slug}/admin`). The super admin panel at `/admin` is not reachable via any custom domain.
+
+The operator guide SHALL document the full custom domain setup procedure:
+1. **Step-by-step flow**: tenant admin sets `custom_domain` in their config form → tenant admin notifies the server operator → operator creates a DNS A/CNAME record pointing the domain at the server → operator adds Caddy block (copy-pasteable snippet above, filling in the slug) → DNS propagates → Caddy automatically obtains a TLS certificate via ACME → domain goes live
+2. **DNS requirements**: an A record pointing to the server's IP address, or a CNAME pointing to `PHX_HOST`; propagation may take up to 48 hours
+3. **TLS**: Caddy ACME HTTP-01 challenge requires port 80 to be reachable from the internet; document the DNS-01 alternative for environments where port 80 is blocked
+4. **`TRUST_PROXY_HEADERS=true`** must be set in `.env`
+5. **Slug immutability**: the tenant slug should not be changed after a custom domain Caddy block references it; if the slug must change, the Caddy block must be updated and reloaded
+
+#### Scenario: Custom domain routes to correct tenant
+- **WHEN** a request arrives at `foosball.acme.com/games` and Caddy is configured with the rewrite rule for slug `acme`
+- **THEN** the request reaches the Phoenix application as `/acme/games` and the game history page for tenant `acme` is rendered
+
+#### Scenario: Tenant admin panel accessible via custom domain
+- **WHEN** a tenant admin navigates to `foosball.acme.com/admin`
+- **THEN** Caddy rewrites the path to `/acme/admin` and the tenant admin panel is rendered
+
+#### Scenario: Super admin panel not reachable via custom domain
+- **WHEN** a request is made to `foosball.acme.com/admin` with the Caddy rewrite in place
+- **THEN** the path is rewritten to `/{slug}/admin` and routed to the tenant admin panel; the super admin panel is not rendered
+
 ### Requirement: Super admin panel is accessible regardless of custom domain configuration
-When operators configure Caddy with custom domains for tenants (e.g. `foosball.acme.com` → rewrites to `/:tenant_slug/`), the super admin panel at `/admin` SHALL remain accessible.
-
-Caddy operates as a transparent reverse proxy: it forwards all request paths to the application, including `/admin`. The path rewriting for custom domains applies only to tenant-scoped routes. `/admin` is a root-level Phoenix route and is unaffected by tenant URL rewriting in Caddy.
-
-The operator guide SHALL document:
-1. **Single-domain setup** (default): all tenants accessed at `https://{PHX_HOST}/:slug/` — `/admin` is at `https://{PHX_HOST}/admin`, no special configuration needed.
-2. **Custom domain setup**: each tenant may optionally configure a `custom_domain` (e.g. `foosball.acme.com`). Caddy routes `foosball.acme.com` to the app, and the app uses the `X-Forwarded-Host` header (via `Plug.RewriteOn`) to resolve the tenant slug. The `/admin` panel is still accessible at `https://{PHX_HOST}/admin` (the base domain, not via the custom tenant domain).
-3. **Operator guidance**: super admins SHOULD bookmark `https://{PHX_HOST}/admin` as the canonical admin URL. It is intentionally not exposed via tenant custom domains, which provides a natural separation between tenant-facing and admin interfaces.
+When operators configure Caddy with custom domains for tenants, the super admin panel at `/admin` SHALL remain accessible at `https://{PHX_HOST}/admin` and SHALL NOT be reachable via any tenant custom domain.
 
 #### Scenario: /admin accessible on base domain with custom tenant domain configured
 - **WHEN** a tenant has `custom_domain = "foosball.acme.com"` configured and a super admin navigates to `https://{PHX_HOST}/admin`
-- **THEN** the super admin panel loads correctly; the custom domain configuration does not block access to the admin panel via the base domain
+- **THEN** the super admin panel loads correctly
 
-#### Scenario: Caddy proxies /admin path to application
-- **WHEN** Caddy receives a request for `/admin` on any configured domain
-- **THEN** the request is forwarded to the Phoenix application unchanged and the application handles routing
+#### Scenario: /admin not reachable via tenant custom domain
+- **WHEN** a request is made to `https://foosball.acme.com/admin`
+- **THEN** the super admin panel is NOT rendered; the request either 404s or routes to the tenant admin panel depending on the chosen routing approach — in neither case is the super admin panel exposed
 
 ### Requirement: Responsive SVG foosball table scales across screen sizes
 The SVG foosball table component SHALL use a `viewBox` attribute and scale with CSS (`width: 100%; height: auto`) to fit any screen width. Position slots SHALL maintain a minimum touch target of 44×44px at all breakpoints. The layout SHALL be tested at 375px (iPhone SE) and 430px (large Android) widths.

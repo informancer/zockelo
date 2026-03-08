@@ -1,6 +1,6 @@
 ## 1. Project Setup
 
-- [ ] 1.1 Create new Phoenix project with `mix phx.new zockelo` and configure Postgres; add MIT `LICENSE` file
+- [ ] 1.1 Create new Phoenix project with `mix phx.new zockelo` and configure Postgres; add MIT `LICENSE` file; extend the generated `.gitignore` to also exclude `.env`, `.env.*.local`, `*.secret.exs`, `priv/static/fonts/` (vendored fonts are downloaded at build time, not committed), and any editor/OS artefacts (`.DS_Store`, `.idea/`, `*.swp`)
 - [ ] 1.2 Add dependencies: `commanded`, `commanded_eventstore_adapter`, `eventstore`, `cloak`, `cloak_ecto`, `oban`, `gettext`, `gen_smtp` (Swoosh SMTP adapter), `ex_doc` (dev/docs only), `earmark`, `html_sanitize_ex`, `sobelow` (dev/test), `mix_audit` (dev)
 - [ ] 1.3 Configure EventStore (Postgres adapter) and run `mix event_store.create && mix event_store.init`
 - [ ] 1.4 Configure Cloak with master key from environment variable and set up `Zockelo.Vault`
@@ -12,8 +12,7 @@
 - [ ] 1.10 Design and produce app icon (icon + wordmark SVG for header; icon-only SVG/PNG set for favicon and PWA manifest icons at 192px and 512px)
 - [ ] 1.11 Add `.tool-versions` (asdf) or `.mise.toml` (mise) file pinning exact Elixir and Erlang/OTP versions matching the Dockerfile base image; ensures local dev environment matches CI and production
 - [ ] 1.12 Write `README.md`: what Zockelo is, quick-start using the inspect-before-run pattern (`curl -fsSL .../setup.sh -o setup.sh` then inspect then `chmod +x && ./setup.sh`), explicit note that `curl | bash` is not recommended, link to operator guide, link to `CONTRIBUTING.md`, license badge
-- [ ] 1.13 Write `CONTRIBUTING.md`: development setup, PR process, and a privacy review checklist — for any PR that adds or modifies data processing: (a) confirm no new PII is logged (grep new Logger calls), (b) confirm email templates contain no external URLs or tracking pixels, (c) update privacy notice if new data is collected or a new purpose introduced, (d) if a new cookie or token is added, confirm it is strictly necessary and document its TTL
-- [ ] 1.13 Write `CONTRIBUTING.md`: dev environment setup (`mix setup`, `mix test`), how to run the app locally, coding conventions (Credo, Dialyzer, Sobelow), commit message style, PR process, note prohibiting external references in email templates
+- [ ] 1.13 Write `CONTRIBUTING.md`: dev environment setup (`mix setup`, `mix test`), how to run the app locally, coding conventions (Credo, Dialyzer, Sobelow), commit message style, PR process; include a privacy review checklist to be completed for any PR that adds or modifies data processing: (a) confirm no new PII is logged (grep new Logger calls), (b) confirm email templates contain no external URLs or tracking pixels, (c) update privacy notice if new data is collected or a new purpose introduced, (d) if a new cookie or token is added, confirm it is strictly necessary and document its TTL
 - [ ] 1.14 Create `CHANGELOG.md` with initial entry for v1.0.0; establish convention (e.g. Keep a Changelog format) for documenting changes between releases so operators know what changed when upgrading
 - [ ] 1.15 Add `.github/pull_request_template.md` (checklist: tests added, Credo passes, no PII in logs, no external email references) and `.github/ISSUE_TEMPLATE/` with bug-report and feature-request templates
 
@@ -37,8 +36,7 @@
 
 ## 4. Read Models and Projections
 
-- [ ] 4.1 Create Ecto migrations for read models: `player_ratings`, `games`, `game_rounds`, `player_profiles`, `tenants` — include all indexes per performance spec
-- [ ] 4.1a Add all required indexes in migrations: (tenant_id, rating DESC) on player_ratings; (tenant_id, logged_at DESC) and (tenant_id, game_id) on games; position column indexes on game_rounds; token_hash unique indexes on sessions and magic_link_tokens; all other indexes per performance spec
+- [ ] 4.1 Create Ecto migrations for read models: `player_ratings`, `games`, `game_rounds`, `player_profiles`, `tenants`; include all required indexes in the same migrations: (tenant_id, rating DESC) on player_ratings; (tenant_id, logged_at DESC) and (tenant_id, game_id) on games; position column indexes on game_rounds; token_hash unique indexes on sessions and magic_link_tokens; all other indexes per performance spec
 - [ ] 4.2 Implement `PlayerRatingsProjection`: handle `PlayerActivated` (insert with rating=1000), `GameConfirmed`/`GameLogged` (update ratings), `PlayerDeleted` (mark deleted)
 - [ ] 4.3 Implement Elo calculation in projection: team avg, expected score, per-player K-factor decay, delta application; apply rating floor of 100 (clamp result if below)
 - [ ] 4.4 Implement `GameHistoryProjection`: handle all game events, track status transitions (pending/confirmed/disputed/voided)
@@ -48,7 +46,7 @@
 ## 5. Authentication
 
 - [ ] 5.1 Create `magic_link_tokens` Ecto migration (email, token_hash, tenant_id, expires_at, used_at); expires_at set to 15 minutes from issuance
-- [ ] 5.2 Implement magic link generation: create token, hash for storage, send email via Swoosh; use tenant `custom_domain` as base URL when set, otherwise `PHX_HOST`
+- [ ] 5.2 Implement magic link generation: create token, hash for storage, send email via Swoosh; use tenant `custom_domain` as base URL when set, otherwise `PHX_HOST`; configure `Swoosh.Adapters.Local` in `config/dev.exs` (Phoenix default) so all emails are captured in memory — developers visit `http://localhost:4000/dev/mailbox` to view sent emails and click magic links without any SMTP setup
 - [ ] 5.3 Implement magic link verification: check hash, expiry, used_at; create session on success
 - [ ] 5.4 Implement session management with signed HTTP-only cookies; enforce idle timeout (default: 8 hours) AND absolute max lifetime (default: 7 days); store session `created_at` to enable absolute expiry check on each request
 - [ ] 5.5 Create `invite_links` Ecto migration (tenant_id, token, expires_at, created_by, revoked_at)
@@ -63,7 +61,7 @@
 ## 7. Super Admin and Tenant Management
 
 - [ ] 7.1 Implement `Zockelo.ReleaseTasks.create_super_admin/1` function (idempotency check: no-op with warning if super admin already exists); wrap it in a `mix zockelo.create_super_admin --email <email>` mix task for dev use; both paths use the same underlying function so it is callable via `./bin/zockelo eval` in Docker release context
-- [ ] 7.2 Build super admin LiveView: `/admin` — tenant list, system config, super admin list; when no tenants exist show a prominent "Create your first workspace" call-to-action above the empty tenant list
+- [ ] 7.2 Build super admin LiveView: `/admin` — tenant list, system config, super admin list; when no tenants exist show a prominent "Create your first league" call-to-action above the empty tenant list
 - [ ] 7.3 Build super admin tenant creation form (direct mode): slug, name, first tenant admin by email invite or existing player selection
 - [ ] 7.4 Build tenant request/approval flow (request form + approval queue in super admin panel); send approval/rejection emails to requester
 - [ ] 7.5 Build system config UI in super admin panel: `tenant_creation_mode` toggle; `audit_log_retention_days` integer input (default: 730, minimum: 90)
@@ -78,8 +76,8 @@
 - [ ] 8.1 Build tenant admin LiveView: `/:tenant_slug/admin` — tabbed layout: players, games, config, legal, GDPR
 - [ ] 8.2 Build player invite by email form (emits `PlayerInvited`, sends magic link)
 - [ ] 8.3 Build pending players list (invited, not activated) with resend magic link and delete actions
-- [ ] 8.4 Build invite link management UI (generate, display, rotate, set expiry)
-- [ ] 8.5 Build tenant config form (rounds_to_win, points_per_round, confirmation_mode, auto_confirm_after_hours, retention_period_days, notify_admin_on_invite_expiry, default_locale, deletion_grace_period_hours, app_name, custom_domain)
+- [ ] 8.4 Build invite link management section in admin panel: show full URL + Copy button; inline expiry date field (set or clear); Rotate button with inline confirmation prompt ("Rotate invite link? The current link will stop working immediately.") — invalidates old token, generates new one, displays new URL in place; "Generate invite link" initial state when no token exists yet; hide entire section if tenant self-registration is disabled
+- [ ] 8.5 Build tenant config form (rounds_to_win, points_per_round, confirmation_mode, auto_confirm_after_hours, retention_period_days, notify_admin_on_invite_expiry, default_locale, deletion_grace_period_hours, app_name, custom_domain); add DB unique index on `custom_domain`; add changeset uniqueness validation with user-facing error; add inline notice below `custom_domain` field explaining the DNS + operator Caddy steps required (always visible, not conditional)
 - [ ] 8.6 Build player deletion UI with confirmation step
 - [ ] 8.7 Build tenant admin role grant/revoke UI
 - [ ] 8.8 Build GDPR audit log view for tenant admins
@@ -130,7 +128,7 @@
 - [ ] 11.13 Implement deleted player placeholder rendering (`[Deleted Player]`) across all views
 - [ ] 11.14 Implement GDPR data export: query profile + game history + admin_audit_log entries where player is actor_id, decrypt PII, serialize to JSON, trigger download
 - [ ] 11.15 Implement player self-deletion in profile settings: confirmation dialog ("this cannot be undone"), dispatch `DeletePlayer` command on confirm, follow identical crypto-shredding flow as admin deletion, log out and redirect to login page on completion
-- [ ] 11.16 Build root landing page LiveView (`/`): state-machine routing — (a) no super admin exists → "Getting started" page with setup instructions and release eval command; (b) super admin exists, no tenants, requesting user is super admin → redirect `/admin`; (c) super admin exists, no tenants, unauthenticated → "No workspaces available yet" page; (d) tenants exist, authenticated player → redirect `/:tenant_slug/`; (e) tenants exist, authenticated super admin → redirect `/admin`; (f) tenants exist, unauthenticated → neutral "Enter your workspace URL" branded page with slug input that navigates to `/:slug/login` on submit; same neutral page shown regardless of how many tenants exist
+- [ ] 11.16 Build root landing page LiveView (`/`): state-machine routing — (a) no super admin exists → "Getting started" page with setup instructions and release eval command; (b) super admin exists, no tenants, requesting user is super admin → redirect `/admin`; (c) super admin exists, no tenants, unauthenticated → "No leagues available yet" page; (d) tenants exist, authenticated player → redirect `/:tenant_slug/`; (e) tenants exist, authenticated super admin → redirect `/admin`; (f) tenants exist, unauthenticated → neutral "Enter your league URL" branded page with slug input that navigates to `/:slug/login` on submit; same neutral page shown regardless of how many tenants exist
 
 ## 12. In-app Help
 
@@ -154,7 +152,7 @@
 - [ ] 14.4 Show admin notification section in preferences only for tenant admins; default admin notifications to enabled on role grant
 - [ ] 14.5 Implement email delivery helpers: check player preference before sending any configurable notification; set `From: {app_name} <SMTP_FROM>` for tenant-scoped emails and `Reply-To:` first tenant admin email; omit `Reply-To` for system emails (magic links, inactivity warnings); add `List-Unsubscribe` and `List-Unsubscribe-Post` headers to all configurable notification emails using HMAC token encoding `player_id:tenant_id:notification_type`
 - [ ] 14.6 Write email templates: game logged, game confirmed, game disputed, game auto-confirmed; use `app_name` in subject lines and email headers
-- [ ] 14.7 Write two distinct invitation email templates: (a) tenant admin invitation — subject "You've been invited to manage [Workspace Name]", body explains admin access; (b) player invitation — subject "You've been invited to [Workspace Name]"; both include workspace name and a single "Accept invitation" CTA linking to the magic link
+- [ ] 14.7 Write two distinct invitation email templates: (a) tenant admin invitation — subject "You've been invited to manage [league Name]", body explains admin access; (b) player invitation — subject "You've been invited to [league Name]"; both include league name and a single "Accept invitation" CTA linking to the magic link
 - [ ] 14.7 Write email templates: game disputed (admin), new player via invite link, invite expired, tenant deletion requested, system maintenance announcement; use `app_name` in subject lines and email headers
 - [ ] 14.8 Wire game events to notification dispatch (respect per-player preferences)
 - [ ] 14.9 Implement `POST /unsubscribe` endpoint (no auth, exempt from CSRF): verify HMAC-SHA256 token encoding `player_id:tenant_id:notification_type` signed with `SECRET_KEY_BASE`; on valid token disable that notification preference for the player; return 200; include `List-Unsubscribe` and `List-Unsubscribe-Post` headers on all outgoing notification emails
@@ -168,7 +166,7 @@
 - [ ] 15.2 Implement tenant isolation plug: apply only to protected routes (all `/:tenant_slug/*` except `/login`, `/join`, `/imprint`, `/privacy`); validate that the authenticated player is a member of the tenant identified by the slug, or is a super admin; return 404 for non-members; public routes bypass the plug entirely and are accessible to any visitor regardless of authentication state
 - [ ] 15.3 Enforce tenant-scoped queries: audit all Ecto queries for domain resources to ensure `tenant_id` filter is always present
 - [ ] 15.4 Implement security headers plug: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; configure CSP with `put_secure_browser_headers/2` nonce + `connect-src wss://{effective_host}` (tenant custom_domain or PHX_HOST, resolved per request) + `img-src 'self' data:`; apply nonce to LiveView client script tag and all JS hook `<script>` tags
-- [ ] 15.11 Add `plug Plug.RewriteOn, [:x_forwarded_host, :x_forwarded_proto]` to endpoint to trust proxy headers; document required proxy configuration (Caddy example) in operator guide
+- [ ] 15.11 Gate `Plug.RewriteOn` behind `TRUST_PROXY_HEADERS=true` env var: only add the plug to the endpoint pipeline when `System.get_env("TRUST_PROXY_HEADERS") == "true"`; document in `.env.example` that this must be set when running behind Caddy or any reverse proxy, and must NOT be set when the application is exposed directly; add a startup warning log when the app is in production and `TRUST_PROXY_HEADERS` is not set
 - [ ] 15.5 Harden session config: regenerate session ID on login, set HttpOnly + Secure + SameSite=Lax, configure idle timeout (default 8h)
 - [ ] 15.6 Enforce cryptographic token generation: use `:crypto.strong_rand_bytes(32)` for all tokens; store SHA-256 hash only
 - [ ] 15.7 Create `admin_audit_log` Ecto migration (actor_id, actor_role, tenant_id, action, target_id, target_type, performed_at)
@@ -265,7 +263,7 @@
 - [ ] 19.19 Implement `Zockelo.Release.rotate_cloak_key/0` mix task and document the key rotation procedure in the operator guide: configure secondary key in `config/runtime.exs`, run re-encryption task, promote new key to primary, remove old key
 - [ ] 19.16 Write Grafana alerting rule provisioning files (YAML): health check failure, 5xx error rate >5%, Oban failure rate >10/min, app RAM >200MB; configure contact point from `GRAFANA_ALERT_EMAIL` / `GRAFANA_WEBHOOK_URL` env vars in `docker-compose.yml`
 - [ ] 19.17 Configure graceful shutdown in Mix release: set `:shutdown` timeout to 35000ms in `rel/config.exs` or `mix.exs` releases config; set `config :oban, shutdown_grace_period: 30_000`; document in operator guide that `docker stop` sends SIGTERM with a matching timeout
-- [ ] 19.21 Document Caddy reverse proxy configuration in operator guide: (a) default single-domain setup — all tenants at `/{slug}/`, `/admin` at `/admin`; (b) per-tenant custom domain setup — Caddy proxies all paths (including `/admin`) to the app; app resolves tenant from `X-Forwarded-Host` via `Plug.RewriteOn`; `/admin` remains accessible via the base `PHX_HOST` domain; (c) operator guidance: super admins should bookmark `https://{PHX_HOST}/admin`; tenant custom domains intentionally do not expose the admin panel
+- [ ] 19.21 Document Caddy reverse proxy configuration in operator guide: (a) default single-domain setup — all tenants at `/{slug}/`, `/admin` at `/admin`, no special config needed; (b) per-tenant custom domain setup — complete step-by-step flow with copy-pasteable Caddy block using `rewrite * /{slug}{uri}` + `reverse_proxy app:4000 { header_up X-Forwarded-Host {host} }`; (c) DNS requirements: A record to server IP or CNAME to PHX_HOST; propagation up to 48h; (d) TLS: Caddy ACME HTTP-01 requires port 80 open; document DNS-01 alternative for restricted environments; (e) set `TRUST_PROXY_HEADERS=true` in `.env`; (f) super admin panel only accessible via `PHX_HOST/admin` — custom domain routes `/admin` to the tenant admin panel, not the super admin panel; (g) slug immutability note: if tenant slug changes, the Caddy block must be updated
 
 ## 20. Maintenance
 
@@ -364,6 +362,12 @@
 - [ ] 22.81 Test config snapshot in GameLogged event: change rounds_to_win after logging a game; verify the stored event retains the original rounds_to_win value
 - [ ] 22.82 Test invite link URL format: generated link follows /:tenant_slug/join?code={token} pattern
 - [ ] 22.83 Test revoked invite link renders error page (not a 404 or crash)
+- [ ] 22.91 Test invite link rotation: clicking Rotate shows confirmation prompt without invalidating the link; confirming invalidates the old token immediately and displays a new URL; old token returns "no longer valid" error; new token is valid
+- [ ] 22.92 Test invite link expiry UI: setting an expiry date persists it; clearing returns to "No expiry"; link becomes invalid after expiry date passes
+- [ ] 22.93 Test custom_domain uniqueness: saving a custom_domain already used by another tenant returns a validation error and does not update the record
+- [ ] 22.94 Test magic link URL uses custom_domain when set; reverts to PHX_HOST after custom_domain is cleared
+- [ ] 22.95 Test TRUST_PROXY_HEADERS=false (unset): X-Forwarded-Host header is ignored; application uses raw request host
+- [ ] 22.96 Test TRUST_PROXY_HEADERS=true: X-Forwarded-Host header is trusted for URL generation and CSP effective_host resolution
 - [ ] 22.84 Test tenant admin first login redirects to /:tenant_slug/admin after privacy summary; regular player redirects to /:tenant_slug/
 - [ ] 22.85 Test leaderboard tiebreaker: two players with equal rating and equal games — sorted alphabetically; two players with equal rating, unequal games — higher games_played ranked first
 - [ ] 22.86 Test player card picker auto-fill: with exactly 2 active players in tenant, form opens with both slots pre-filled; with 3+ players, slots are empty and picker must be used
@@ -376,9 +380,9 @@
 - [ ] 22.58 Test GDPR data export includes `admin_audit_log` entries where the exporting player is the actor
 - [ ] 22.59 Test audit log cleanup: entries older than `audit_log_retention_days` are deleted by the cleanup job; entries within the window are retained; verify minimum of 90 days is enforced on the config value
 - [ ] 22.60 Test root landing page — fresh install: with no super admin in DB, GET `/` renders the "Getting started" setup instructions page containing the `./bin/zockelo eval` command
-- [ ] 22.61 Test root landing page — super admin, no tenants, unauthenticated: GET `/` renders "No workspaces available yet" page
+- [ ] 22.61 Test root landing page — super admin, no tenants, unauthenticated: GET `/` renders "No leagues available yet" page
 - [ ] 22.62 Test root landing page — super admin, no tenants, authenticated as super admin: GET `/` redirects to `/admin`
-- [ ] 22.63 Test root landing page — tenants exist, unauthenticated: GET `/` renders neutral "Enter your workspace URL" page with slug input, regardless of tenant count (test with 1 tenant and with 3 tenants)
+- [ ] 22.63 Test root landing page — tenants exist, unauthenticated: GET `/` renders neutral "Enter your league URL" page with slug input, regardless of tenant count (test with 1 tenant and with 3 tenants)
 - [ ] 22.64 Test root landing page — tenants exist, authenticated player: GET `/` redirects to `/:tenant_slug/`
 - [ ] 22.65 Test root landing page — tenants exist, authenticated super admin: GET `/` redirects to `/admin`
 - [ ] 22.66 Test neutral landing page slug submission: submitting a slug from the neutral page navigates to `/:slug/login`

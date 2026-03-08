@@ -129,11 +129,11 @@ LiveView components SHALL use `assign_new/3` and `update/3` appropriately to avo
 - **THEN** only the affected player rows are re-rendered in connected clients' leaderboards
 
 ### Requirement: Projection rebuilds complete in acceptable time
-A full projection rebuild from the event store SHALL complete within 60 seconds for a tenant with up to 10,000 events. Rebuilds SHALL not impact live user traffic (run in a separate process).
+A full projection rebuild from the event store SHALL complete within 60 seconds for a tenant with up to 10,000 events. Full rebuilds (drop and replay) require a planned maintenance window per the maintenance spec — they cannot run safely in parallel with live traffic. Normal projection catch-up (a lagging handler replaying missed events after a restart) SHALL run in a separate process without blocking requests.
 
-#### Scenario: Projection rebuild does not block requests
-- **WHEN** a projection rebuild is in progress
-- **THEN** the application continues serving requests using the existing read model until the rebuild completes
+#### Scenario: Projection catch-up does not block requests
+- **WHEN** a projection handler is catching up on missed events after a restart
+- **THEN** the application continues serving requests using the existing read model until the handler is current
 
 ### Requirement: Stale session and token cleanup runs regularly
 Expired magic link tokens, expired invite links, and expired sessions SHALL be cleaned up by a scheduled Oban job running at least once daily. Accumulation of expired records SHALL not degrade query performance.

@@ -200,6 +200,21 @@ When a magic link includes a `return_to` query parameter, the redirect target SH
 - **WHEN** a magic link includes `return_to=https://evil.example.com`
 - **THEN** the redirect target is ignored and the player is sent to the tenant dashboard
 
+### Requirement: Proxy header trust is opt-in via environment variable
+`Plug.RewriteOn` (which causes the application to trust `X-Forwarded-Host`, `X-Forwarded-Proto`, and related headers) SHALL only be enabled when the environment variable `TRUST_PROXY_HEADERS=true` is set. When this variable is absent or false, the application SHALL ignore forwarded headers and use the raw request host and protocol.
+
+This prevents an attacker who can reach the application directly (bypassing the proxy) from spoofing the `X-Forwarded-Host` header to impersonate a different tenant's custom domain. Operators using a reverse proxy (Caddy) MUST set `TRUST_PROXY_HEADERS=true`; operators exposing the application directly MUST NOT.
+
+The `.env.example` file SHALL document this variable and note that it must be `true` when running behind Caddy or any reverse proxy.
+
+#### Scenario: Forwarded headers ignored without opt-in
+- **WHEN** `TRUST_PROXY_HEADERS` is not set and a request arrives with an `X-Forwarded-Host` header
+- **THEN** the application uses the raw request host and ignores the forwarded header
+
+#### Scenario: Forwarded headers trusted when opt-in is set
+- **WHEN** `TRUST_PROXY_HEADERS=true` is set and a request arrives via Caddy with `X-Forwarded-Host: foosball.acme.com`
+- **THEN** the application uses `foosball.acme.com` as the effective host for URL generation and CSP
+
 ### Requirement: HTTPS is enforced in production
 The application SHALL redirect all HTTP requests to HTTPS in production. The `Secure` cookie flag SHALL only be set when the connection is HTTPS. Local development MAY use HTTP.
 

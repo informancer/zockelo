@@ -7,16 +7,16 @@ The root URL (`/`) of the application SHALL render a page appropriate to the cur
 |---|---|---|
 | No super admin exists yet | Any | "Getting started" setup instructions page — links to docs, shows the `./bin/zockelo eval` command to create a super admin |
 | Super admin exists, no tenants yet | Authenticated super admin | Redirect to `/admin` |
-| Super admin exists, no tenants yet | Anyone else | "No workspaces available yet" page |
+| Super admin exists, no tenants yet | Anyone else | "No leagues available yet" page |
 | At least one tenant exists | Authenticated player | Redirect to `/:tenant_slug/` for their tenant |
 | At least one tenant exists | Authenticated super admin | Redirect to `/admin` |
-| At least one tenant exists | Unauthenticated visitor | Neutral branded "Enter your workspace URL" page with a text field for the tenant slug and a "Go" button |
+| At least one tenant exists | Unauthenticated visitor | Neutral branded "Enter your league URL" page with a text field for the tenant slug and a "Go" button |
 
 **The neutral page is shown for any number of tenants** (single or multiple) — the system does not auto-redirect based on tenant count. This keeps the behaviour predictable for operators and avoids leaking the number of tenants to unauthenticated visitors.
 
 The neutral page SHALL include:
 - The app name (`app_name` system config, defaulting to "Zockelo")
-- A brief description: "Enter your workspace name to get started"
+- A brief description: "Enter your league name to get started"
 - A slug input field with a "Go" button that navigates to `/:slug/login`
 - Footer links: imprint and privacy are tenant-scoped and not available at root level; the footer MAY show a generic link to system documentation
 
@@ -30,13 +30,13 @@ The neutral page SHALL include:
 
 #### Scenario: Tenants exist — unauthenticated visitor sees neutral page
 - **WHEN** one or more tenants exist and an unauthenticated visitor accesses `/`
-- **THEN** the neutral "Enter your workspace URL" page is shown regardless of how many tenants exist
+- **THEN** the neutral "Enter your league URL" page is shown regardless of how many tenants exist
 
 #### Scenario: Tenants exist — authenticated player redirected to their tenant
 - **WHEN** one or more tenants exist and an authenticated player accesses `/`
 - **THEN** they are redirected to `/:tenant_slug/`
 
-#### Scenario: Workspace slug submitted from neutral page
+#### Scenario: league slug submitted from neutral page
 - **WHEN** a visitor enters a slug in the neutral page input and submits
 - **THEN** they are navigated to `/:slug/login`
 

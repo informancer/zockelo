@@ -29,7 +29,7 @@ The invite link URL format SHALL be `/:tenant_slug/join?code={token}` where `{to
 
 A player visiting the invite link SHALL be prompted to enter their name and email address. Submitting the form emits a `PlayerInvited` event and sends a magic link to that email. Clicking the magic link emits a `PlayerActivated` event and begins the session.
 
-Visiting an expired or revoked invite link SHALL render an error page: *"This invite link is no longer valid. Ask your workspace administrator for a new one."*
+Visiting an expired or revoked invite link SHALL render an error page: *"This invite link is no longer valid. Ask your league administrator for a new one."*
 
 #### Scenario: Player self-registers via invite link
 - **WHEN** a new user visits `/:tenant_slug/join?code={valid_token}` and submits their name and email
@@ -50,6 +50,40 @@ Visiting an expired or revoked invite link SHALL render an error page: *"This in
 #### Scenario: Tenant admin rotates invite link
 - **WHEN** a tenant admin rotates the invite link from the admin panel
 - **THEN** the previous link is immediately invalidated and a new link is generated with a new token
+
+### Requirement: Invite link management is a dedicated section of the admin panel
+The tenant admin panel SHALL include an **Invite link** section containing:
+
+- The current invite link URL, displayed in full and accompanied by a **Copy** button (copies to clipboard)
+- An optional **expiry date** field showing the current expiry (or "No expiry" if unset), with an inline edit control to set or clear it
+- A **Rotate** button that, when clicked, shows an inline confirmation prompt — *"Rotate invite link? The current link will stop working immediately."* — with Confirm and Cancel actions. On confirmation, the old token is invalidated, a new token is generated, and the new URL is displayed immediately in place of the old one.
+- If no invite link has been generated yet (fresh tenant), the section shows a **Generate invite link** button instead.
+
+The invite link section SHALL be absent from the admin panel entirely if the tenant's self-registration is disabled (per tenant config).
+
+#### Scenario: Admin copies the current invite link
+- **WHEN** a tenant admin opens the admin panel invite link section
+- **THEN** the full invite URL is visible and a Copy button places it on the clipboard
+
+#### Scenario: Admin sets an expiry on the invite link
+- **WHEN** a tenant admin sets an expiry date on the invite link
+- **THEN** the link remains valid until that date; visits after the expiry date render the "no longer valid" error page
+
+#### Scenario: Admin clears the expiry date
+- **WHEN** a tenant admin clears the expiry date field
+- **THEN** the invite link has no expiry and remains valid indefinitely until rotated
+
+#### Scenario: Rotation confirmation prevents accidental invalidation
+- **WHEN** a tenant admin clicks Rotate
+- **THEN** an inline confirmation prompt is shown before any action is taken; the link is only invalidated after the admin confirms
+
+#### Scenario: New link displayed immediately after rotation
+- **WHEN** a tenant admin confirms rotation
+- **THEN** the new invite URL appears in the section immediately; the admin can copy it without navigating away
+
+#### Scenario: Fresh tenant with no link yet
+- **WHEN** a tenant admin opens the invite link section and no link has been generated
+- **THEN** a "Generate invite link" button is shown; clicking it creates the first token and displays the URL
 
 ### Requirement: Player data is stored with crypto-shredding
 PII fields (name, email) in events SHALL be encrypted using a per-player AES-256 key. Keys SHALL be envelope-encrypted with a system master key via Cloak. The raw player UUID and tenant UUID SHALL never be encrypted.

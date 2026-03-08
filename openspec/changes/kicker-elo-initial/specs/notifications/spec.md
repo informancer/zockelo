@@ -64,24 +64,24 @@ The following notification SHALL be configurable per player (default: enabled), 
 - **WHEN** a player disables the maintenance announcement notification or clicks the unsubscribe link in a maintenance email
 - **THEN** future maintenance announcement emails are not sent to that player
 
-### Requirement: Invitation emails clearly state the role and workspace
+### Requirement: Invitation emails clearly state the role and league
 When a `PlayerInvited` event is emitted, the activation email SHALL clearly communicate:
-- The name of the workspace the player has been invited to (tenant `app_name` or slug)
+- The name of the league the player has been invited to (tenant `app_name` or slug)
 - Whether they are being invited as a **tenant admin** or as a **regular player** — these are distinct email templates
 - A single call-to-action button: "Accept invitation and set up your account" linking to the magic link URL
 
-The **tenant admin invitation** email subject SHALL be: *"You've been invited to manage [Workspace Name]"*
-The **player invitation** email subject SHALL be: *"You've been invited to [Workspace Name]"*
+The **tenant admin invitation** email subject SHALL be: *"You've been invited to manage [league Name]"*
+The **player invitation** email subject SHALL be: *"You've been invited to [league Name]"*
 
 Neither template is configurable per player (these are mandatory activation emails).
 
 #### Scenario: Tenant admin receives role-specific invitation email
 - **WHEN** a `PlayerInvited` event is emitted with the tenant admin role
-- **THEN** the email subject says "You've been invited to manage [Workspace Name]" and the body explains they will have administrative access
+- **THEN** the email subject says "You've been invited to manage [league Name]" and the body explains they will have administrative access
 
 #### Scenario: Player receives standard invitation email
 - **WHEN** a `PlayerInvited` event is emitted without admin role
-- **THEN** the email subject says "You've been invited to [Workspace Name]" with no mention of admin access
+- **THEN** the email subject says "You've been invited to [league Name]" with no mention of admin access
 
 ### Requirement: Mandatory notifications cannot be disabled
 The following notifications SHALL always be sent regardless of player preferences:
