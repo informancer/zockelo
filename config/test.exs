@@ -20,6 +20,14 @@ config :zockelo, Zockelo.EventStore,
   hostname: "localhost",
   database: "zockelo_eventstore_test#{System.get_env("MIX_TEST_PARTITION")}"
 
+# Cloak vault — fixed test key (32 bytes, base64-encoded)
+config :zockelo, Zockelo.Vault,
+  ciphers: [
+    default: {Cloak.Ciphers.AES.GCM,
+      tag: "AES.GCM.V1",
+      key: Base.decode64!("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")}
+  ]
+
 # Disable Oban in tests (enable per-test with Oban.Testing)
 config :zockelo, Oban, testing: :inline
 

@@ -29,11 +29,11 @@
 
 ## 3. Crypto-shredding
 
-- [ ] 3.1 Create `player_keys` Ecto migration (player_id, tenant_id, encrypted_key, created_at)
-- [ ] 3.2 Create `gdpr_key_deletions` Ecto migration (player_id, tenant_id, deleted_at)
-- [ ] 3.3 Implement key generation on `PlayerInvited` command: generate AES key, encrypt with Cloak vault, store in `player_keys`
-- [ ] 3.4 Implement `Zockelo.Crypto.decrypt_field/2` that returns `[Deleted Player]` / nil on key-not-found
-- [ ] 3.5 Implement player deletion: delete key from `player_keys`, insert into `gdpr_key_deletions`, revoke sessions, delete magic link tokens
+- [x] 3.1 Create `player_keys` Ecto migration (player_id, tenant_id, encrypted_key, created_at)
+- [x] 3.2 Create `gdpr_key_deletions` Ecto migration (player_id, tenant_id, deleted_at)
+- [x] 3.3 Implement key generation on `PlayerInvited` command: generate AES key, encrypt with Cloak vault, store in `player_keys`
+- [x] 3.4 Implement `Zockelo.Crypto.decrypt_field/2` that returns `[Deleted Player]` / nil on key-not-found
+- [x] 3.5 Implement player deletion: delete key from `player_keys`, insert into `gdpr_key_deletions`, revoke sessions, delete magic link tokens
 
 ## 4. Read Models and Projections
 
