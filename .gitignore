@@ -50,3 +50,6 @@ npm-debug.log
 .idea/
 *.swp
 *.swo
+
+# Claude Code working directory
+.claude/
