@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
+  <!-- Icon square -->
+  <rect width="120" height="120" fill="#f97316" rx="20"/>
+
+  <!-- Rod -->
+  <rect x="10" y="62" width="100" height="8" fill="#9ca3af" rx="4"/>
+
+  <!-- Head -->
+  <circle cx="60" cy="38" r="20" fill="#fbbf24"/>
+  <circle cx="53" cy="36" r="3" fill="#1e293b"/>
+  <circle cx="67" cy="36" r="3" fill="#1e293b"/>
+  <path d="M53 44 Q60 50 67 44" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Torso -->
+  <rect x="46" y="58" width="28" height="30" fill="#ffffff" rx="5"/>
+  <text x="60" y="80" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#f97316">Z</text>
+
+  <!-- Shorts -->
+  <rect x="46" y="86" width="28" height="14" fill="#1e3a8a" rx="3"/>
+
+  <!-- Legs -->
+  <rect x="48" y="98" width="10" height="14" fill="#1e3a8a" rx="3"/>
+  <rect x="62" y="98" width="10" height="14" fill="#1e3a8a" rx="3"/>
+
+  <!-- Boots -->
+  <ellipse cx="53" cy="115" rx="12" ry="6" fill="#1e293b"/>
+  <ellipse cx="67" cy="115" rx="12" ry="6" fill="#1e293b"/>
+
+  <!-- Wordmark -->
+  <text x="148" y="78" font-family="ui-sans-serif, system-ui, sans-serif" font-size="52" font-weight="700" fill="#1e293b" letter-spacing="-1">Zockelo</text>
+</svg>
