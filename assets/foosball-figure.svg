@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200" width="120" height="200">
+  <!-- Rod -->
+  <rect x="0" y="88" width="120" height="10" fill="#6b7280" rx="5"/>
+
+  <!-- Head -->
+  <circle cx="60" cy="52" r="26" fill="#fbbf24"/>
+  <!-- Eyes -->
+  <circle cx="51" cy="50" r="3.5" fill="#1e293b"/>
+  <circle cx="69" cy="50" r="3.5" fill="#1e293b"/>
+  <!-- Mouth -->
+  <path d="M51 61 Q60 68 69 61" stroke="#1e293b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Torso / jersey -->
+  <rect x="40" y="80" width="40" height="52" fill="#dc2626" rx="6"/>
+  <!-- Jersey number -->
+  <text x="60" y="113" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="white">1</text>
+
+  <!-- Shorts -->
+  <rect x="40" y="128" width="40" height="20" fill="#1e3a8a" rx="4"/>
+
+  <!-- Left leg -->
+  <rect x="42" y="146" width="16" height="36" fill="#1e3a8a" rx="5"/>
+  <!-- Right leg -->
+  <rect x="62" y="146" width="16" height="36" fill="#1e3a8a" rx="5"/>
+
+  <!-- Left boot -->
+  <ellipse cx="50" cy="184" rx="16" ry="9" fill="#1e293b"/>
+  <!-- Right boot -->
+  <ellipse cx="70" cy="184" rx="16" ry="9" fill="#1e293b"/>
+</svg>
