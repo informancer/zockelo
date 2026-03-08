@@ -5,4 +5,6 @@ defmodule Zockelo.CommandedApp do
       adapter: Commanded.EventStore.Adapters.EventStore,
       event_store: Zockelo.EventStore
     ]
+
+  router Zockelo.Domain.Router
 end

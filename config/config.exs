@@ -34,6 +34,13 @@ config :zockelo, Zockelo.Vault,
     default: {Cloak.Ciphers.AES.GCM, tag: "AES.GCM.V1", key: {:system, "CLOAK_KEY"}}
   ]
 
+# Hammer — rate limiting backend (ETS, 4-hour expiry, 10-minute cleanup)
+config :hammer,
+  backend: {Hammer.Backend.ETS, [
+    expiry_ms: :timer.hours(4),
+    cleanup_interval_ms: :timer.minutes(10)
+  ]}
+
 # Oban — three named queues per observability spec
 config :zockelo, Oban,
   repo: Zockelo.Repo,

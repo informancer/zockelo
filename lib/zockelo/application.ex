@@ -13,8 +13,7 @@ defmodule Zockelo.Application do
       Zockelo.Repo,
       {DNSCluster, query: Application.get_env(:zockelo, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Zockelo.PubSub},
-      # EventStore must start before Commanded
-      Zockelo.EventStore,
+      # CommandedApp supervises EventStore internally via the adapter
       Zockelo.CommandedApp,
       # Background jobs
       {Oban, Application.fetch_env!(:zockelo, Oban)},
