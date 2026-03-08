@@ -19,13 +19,13 @@
 
 ## 2. Core Domain: Events and Aggregates
 
-- [ ] 2.1 Define all event structs with explicit version suffix (`TenantRegistered.V1`, `TenantRequested.V1`, `TenantApproved.V1`, `TenantRejected.V1`); establish convention: breaking event changes always introduce a new version module + `Commanded.Event.Upcaster` implementation
-- [ ] 2.2 Define player events: `PlayerInvited.V1`, `PlayerActivated.V1`, `PlayerDeleted.V1`
-- [ ] 2.3 Define game events: `GameLogged.V1`, `GameConfirmed.V1`, `GameDisputed.V1`, `GameReinstated.V1`, `GameVoided.V1`
-- [ ] 2.4 Implement `Tenant` aggregate with command handlers for tenant creation/approval/config update
-- [ ] 2.5 Implement `Player` aggregate with command handlers for invite, activate, delete
-- [ ] 2.6 Implement `Game` aggregate with command handlers for log, confirm, dispute, reinstate, void
-- [ ] 2.7 Configure Commanded application with stream-per-tenant naming (`tenant-{id}-players`, `tenant-{id}-games`)
+- [x] 2.1 Define all event structs with explicit version suffix (`TenantRegistered.V1`, `TenantRequested.V1`, `TenantApproved.V1`, `TenantRejected.V1`); establish convention: breaking event changes always introduce a new version module + `Commanded.Event.Upcaster` implementation
+- [x] 2.2 Define player events: `PlayerInvited.V1`, `PlayerActivated.V1`, `PlayerDeleted.V1`
+- [x] 2.3 Define game events: `GameLogged.V1`, `GameConfirmed.V1`, `GameDisputed.V1`, `GameReinstated.V1`, `GameVoided.V1`
+- [x] 2.4 Implement `Tenant` aggregate with command handlers for tenant creation/approval/config update
+- [x] 2.5 Implement `Player` aggregate with command handlers for invite, activate, delete
+- [x] 2.6 Implement `Game` aggregate with command handlers for log, confirm, dispute, reinstate, void
+- [x] 2.7 Configure Commanded application with stream-per-tenant naming (`tenant-{id}-players`, `tenant-{id}-games`)
 
 ## 3. Crypto-shredding
 
