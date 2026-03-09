@@ -2,7 +2,7 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
   @moduledoc "Profile settings: /:tenant_slug/settings"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Players, Games}
+  alias Zockelo.Players
 
   @impl true
   def mount(_params, _session, socket) do

@@ -1,8 +1,8 @@
 defmodule ZockeloWeb.Tenant.LoginLive do
-  @moduledoc "Magic link login: /:tenant_slug/login — full implementation in section 13."
+  @moduledoc "Magic link login request: /:tenant_slug/login"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.Tenants
+  alias Zockelo.{Auth, Players, Tenants}
 
   @impl true
   def mount(%{"tenant_slug" => slug}, _session, socket) do
@@ -14,15 +14,35 @@ defmodule ZockeloWeb.Tenant.LoginLive do
       {:ok,
        socket
        |> assign(:tenant, tenant)
-       |> assign(:page_title, "Login — #{app_name(tenant)}")
-       |> assign(:submitted, false)}
+       |> assign(:page_title, "Sign in — #{app_name(tenant)}")
+       |> assign(:submitted, false)
+       |> assign(:error, nil)}
     end
   end
 
   @impl true
-  def handle_event("request_link", %{"email" => _email}, socket) do
-    # Full implementation in section 13 (magic link generation + email dispatch)
+  def handle_event("login", %{"email" => email}, socket) when byte_size(email) > 0 do
+    tenant = socket.assigns.tenant
+
+    # Look up player — silently do nothing if not found (no email enumeration)
+    case Players.find_player_by_email(tenant.id, email) do
+      {:ok, player_id} ->
+        Auth.generate_magic_link(email, tenant.id, player_id)
+
+      {:error, :not_found} ->
+        :ok
+    end
+
+    # Always show "check your email" regardless of outcome
     {:noreply, assign(socket, :submitted, true)}
+  end
+
+  def handle_event("login", _params, socket) do
+    {:noreply, assign(socket, :error, "Please enter your email address.")}
+  end
+
+  def handle_event("reset", _params, socket) do
+    {:noreply, assign(socket, submitted: false, error: nil)}
   end
 
   @impl true
@@ -36,11 +56,23 @@ defmodule ZockeloWeb.Tenant.LoginLive do
         </div>
 
         <%= if @submitted do %>
-          <div class="rounded-lg bg-green-50 border border-green-200 p-4 text-center text-sm text-green-700">
-            Check your email for a login link.
+          <div class="rounded-lg bg-green-50 border border-green-200 p-6 text-center space-y-2">
+            <p class="font-semibold text-green-700">Check your email</p>
+            <p class="text-sm text-green-600">
+              We sent a sign-in link to your inbox. It expires in 15 minutes.
+            </p>
+            <p class="text-xs text-gray-400 mt-3">
+              Didn't get it? Check your spam folder or
+              <button phx-click="reset" class="underline text-blue-500">try again</button>.
+            </p>
           </div>
         <% else %>
-          <form phx-submit="request_link" class="space-y-4">
+          <form phx-submit="login" class="space-y-4">
+            <%= if @error do %>
+              <div class="rounded bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                <%= @error %>
+              </div>
+            <% end %>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
               <input type="email" name="email" required autofocus
@@ -50,6 +82,10 @@ defmodule ZockeloWeb.Tenant.LoginLive do
             <button type="submit" class="btn btn-primary w-full">Send magic link</button>
           </form>
         <% end %>
+
+        <p class="text-center text-sm text-gray-400">
+          Don't have an account? Ask your league admin for an invite.
+        </p>
       </div>
     </div>
     """

@@ -28,19 +28,34 @@ import {hooks as colocatedHooks} from "phoenix-colocated/zockelo"
 import LocalTime from "./hooks/local_time"
 import ThemeToggle from "./hooks/theme_toggle"
 import ServiceWorker from "./hooks/service_worker"
+import Tooltip from "./hooks/tooltip"
+import RatingChart from "./hooks/rating_chart"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, LocalTime, ThemeToggle, ServiceWorker},
+  hooks: {...colocatedHooks, LocalTime, ThemeToggle, ServiceWorker, Tooltip, RatingChart},
 })
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+
+// GDPR data export — triggered by push_event("download_json", ...)
+window.addEventListener("phx:download_json", ({detail: {filename, content}}) => {
+  const blob = new Blob([content], {type: "application/json"})
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+})
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

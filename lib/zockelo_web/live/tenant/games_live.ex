@@ -2,7 +2,7 @@ defmodule ZockeloWeb.Tenant.GamesLive do
   @moduledoc "Game history for a tenant: /:tenant_slug/games"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Games, Players}
+  alias Zockelo.Games
 
   @impl true
   def mount(_params, _session, socket) do

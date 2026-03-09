@@ -2,7 +2,7 @@ defmodule ZockeloWeb.Tenant.PlayerProfileLive do
   @moduledoc "Player profile: /:tenant_slug/players/:player_id"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Games, Players}
+  alias Zockelo.Players
   alias Zockelo.Projections.{PlayerProfile, PlayerRating}
   alias Zockelo.Repo
 

@@ -48,6 +48,12 @@ defmodule ZockeloWeb.Router do
     get "/manifest.json", ManifestController, :show
     get "/:tenant_slug/manifest.json", ManifestController, :show
 
+    # Magic link verification — writes session, redirects to destination
+    get "/auth/magic", AuthController, :magic
+
+    # Logout
+    get "/auth/logout", AuthController, :logout
+
     # Email change confirmation — accessible while optionally authenticated
     live "/auth/email-change", EmailChangeLive
   end
@@ -57,6 +63,7 @@ defmodule ZockeloWeb.Router do
     pipe_through :browser
 
     live "/login", LoginLive
+    live "/join", JoinLive
   end
 
   # Tenant pages — /:tenant_slug/*
@@ -67,8 +74,11 @@ defmodule ZockeloWeb.Router do
     live "/leaderboard", LeaderboardLive
     live "/players/:player_id", PlayerProfileLive
     live "/settings", ProfileSettingsLive
+    live "/activate", ActivateLive
+    live "/privacy-summary", PrivacySummaryLive
     live "/games", GamesLive
     live "/games/new", GameNewLive
+    live "/help", HelpLive
   end
 
   # Tenant admin panel — /:tenant_slug/admin

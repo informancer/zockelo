@@ -133,17 +133,17 @@
 
 ## 12. In-app Help
 
-- [ ] 12.1 Build help page LiveView: `/:tenant_slug/help` — renders tenant-aware content driven by active tenant config (confirmation mode on/off, rounds to win, points per round, Elo explanation, team balancer explanation)
-- [ ] 12.2 Add tooltip component (accessible, keyboard-dismissable); apply to: Elo rating display, K-factor, team balancer widget, confirmation mode indicators, auto-confirm countdown
+- [x] 12.1 Build help page LiveView: `/:tenant_slug/help` — renders tenant-aware content driven by active tenant config (confirmation mode on/off, rounds to win, points per round, Elo explanation, team balancer explanation)
+- [x] 12.2 Add tooltip component (accessible, keyboard-dismissable); apply to: Elo rating display, K-factor, team balancer widget, confirmation mode indicators, auto-confirm countdown
 
 ## 13. Login and Onboarding UI
 
-- [ ] 13.1 Build magic link request LiveView: `/:tenant_slug/login`
-- [ ] 13.2 Build "check your email" confirmation page (shown after login form submission, email-agnostic)
-- [ ] 13.3 Build magic link verification handler (token in URL, creates session, redirects to dashboard); for first-time activation (player never logged in before), redirect to privacy summary screen before final destination; after privacy summary: regular players → `/:tenant_slug/`; tenant admins → `/:tenant_slug/admin` with welcome banner
-- [ ] 13.4 Build invite link self-registration LiveView at `/:tenant_slug/join?code={token}` (name + email form, emits `PlayerInvited`); render "This invite link is no longer valid" for expired or revoked tokens
-- [ ] 13.5 Build privacy summary screen shown on first account activation: display brief summary of data collected (name, email, game participation), link to full privacy notice, "Continue" button; shown once only — subsequent logins skip it
-- [ ] 13.6 Build player activation flow (magic link from invite → `PlayerActivated` command)
+- [x] 13.1 Build magic link request LiveView: `/:tenant_slug/login`
+- [x] 13.2 Build "check your email" confirmation page (shown after login form submission, email-agnostic)
+- [x] 13.3 Build magic link verification handler (token in URL, creates session, redirects to dashboard); for first-time activation (player never logged in before), redirect to privacy summary screen before final destination; after privacy summary: regular players → `/:tenant_slug/`; tenant admins → `/:tenant_slug/admin` with welcome banner
+- [x] 13.4 Build invite link self-registration LiveView at `/:tenant_slug/join?code={token}` (name + email form, emits `PlayerInvited`); render "This invite link is no longer valid" for expired or revoked tokens
+- [x] 13.5 Build privacy summary screen shown on first account activation: display brief summary of data collected (name, email, game participation), link to full privacy notice, "Continue" button; shown once only — subsequent logins skip it
+- [x] 13.6 Build player activation flow (magic link from invite → `PlayerActivated` command)
 
 ## 14. Notifications
 

@@ -16,6 +16,7 @@ defmodule Zockelo.Players do
 
   alias Zockelo.Domain.Commands.{
     InvitePlayer,
+    ActivatePlayer,
     DeletePlayer,
     UpdateTenantConfig,
     UpdatePlayerName,
@@ -135,6 +136,61 @@ defmodule Zockelo.Players do
 
   @doc "Returns a single player profile or nil."
   def get_player(player_id), do: Repo.get(PlayerProfile, player_id)
+
+  @doc """
+  Finds a player in a tenant by email. Decrypts each profile's email and compares.
+  Returns `{:ok, player_id}` or `{:error, :not_found}`.
+  Intentionally O(n) — office-scale user bases are small.
+  """
+  def find_player_by_email(tenant_id, email) do
+    profiles =
+      Repo.all(
+        from p in PlayerProfile,
+          where: p.tenant_id == ^tenant_id and p.status != "deleted" and not is_nil(p.encrypted_email)
+      )
+
+    result =
+      Enum.find_value(profiles, fn profile ->
+        case Crypto.decrypt_field(profile.player_id, profile.encrypted_email) do
+          {:ok, ^email} -> profile.player_id
+          _ -> nil
+        end
+      end)
+
+    if result, do: {:ok, result}, else: {:error, :not_found}
+  end
+
+  @doc """
+  Activates a player (first login). Encrypts their chosen name, dispatches
+  `ActivatePlayer`, and updates `player_profiles` for sync read consistency.
+  """
+  def activate_player(player_id, tenant_id, name) do
+    with {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
+      encrypted_name_b64 = Base.encode64(encrypted_name_bin)
+
+      :ok = CommandedApp.dispatch(%ActivatePlayer{
+        player_id: player_id,
+        tenant_id: tenant_id,
+        encrypted_name: encrypted_name_b64
+      })
+
+      Repo.update_all(
+        from(p in PlayerProfile, where: p.player_id == ^player_id),
+        set: [status: "active", encrypted_name: encrypted_name_bin]
+      )
+
+      :ok
+    end
+  end
+
+  @doc "Records that a player has accepted the privacy summary."
+  def accept_privacy(player_id) do
+    Repo.update_all(
+      from(p in PlayerProfile, where: p.player_id == ^player_id),
+      set: [privacy_accepted_at: DateTime.utc_now()]
+    )
+    :ok
+  end
 
   # ---------------------------------------------------------------------------
   # Tenant config
