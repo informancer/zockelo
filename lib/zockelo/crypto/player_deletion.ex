@@ -10,7 +10,11 @@ defmodule Zockelo.Crypto.PlayerDeletion do
     4. Delete magic link tokens     — stub until tokens table exists (section 5)
   """
 
+  import Ecto.Query
+
   alias Zockelo.Crypto
+  alias Zockelo.Repo
+  alias Zockelo.Auth.{Session, MagicLinkToken}
 
   @doc """
   Executes all crypto-shredding steps for the given player. Idempotent.
@@ -22,7 +26,13 @@ defmodule Zockelo.Crypto.PlayerDeletion do
     :ok
   end
 
-  # Stubs — implemented in section 5 (Authentication)
-  defp revoke_sessions(_player_id), do: :ok
-  defp delete_magic_link_tokens(_player_id), do: :ok
+  defp revoke_sessions(player_id) do
+    Repo.delete_all(from s in Session, where: s.player_id == ^player_id)
+    :ok
+  end
+
+  defp delete_magic_link_tokens(player_id) do
+    Repo.delete_all(from t in MagicLinkToken, where: t.player_id == ^player_id)
+    :ok
+  end
 end

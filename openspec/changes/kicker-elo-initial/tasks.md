@@ -74,16 +74,16 @@
 
 ## 8. Tenant Admin Panel
 
-- [ ] 8.1 Build tenant admin LiveView: `/:tenant_slug/admin` — tabbed layout: players, games, config, legal, GDPR
-- [ ] 8.2 Build player invite by email form (emits `PlayerInvited`, sends magic link)
-- [ ] 8.3 Build pending players list (invited, not activated) with resend magic link and delete actions
-- [ ] 8.4 Build invite link management section in admin panel: show full URL + Copy button; inline expiry date field (set or clear); Rotate button with inline confirmation prompt ("Rotate invite link? The current link will stop working immediately.") — invalidates old token, generates new one, displays new URL in place; "Generate invite link" initial state when no token exists yet; hide entire section if tenant self-registration is disabled
-- [ ] 8.5 Build tenant config form (rounds_to_win, points_per_round, confirmation_mode, auto_confirm_after_hours, retention_period_days, notify_admin_on_invite_expiry, default_locale, deletion_grace_period_hours, app_name, custom_domain); add DB unique index on `custom_domain`; add changeset uniqueness validation with user-facing error; add inline notice below `custom_domain` field explaining the DNS + operator Caddy steps required (always visible, not conditional)
-- [ ] 8.6 Build player deletion UI with confirmation step
-- [ ] 8.7 Build tenant admin role grant/revoke UI
-- [ ] 8.8 Build GDPR audit log view for tenant admins
-- [ ] 8.9 Build tenant deletion UI: initiation form, 4-eyes pending state, grace period countdown, cancel action
-- [ ] 8.10 Implement `ExpiredInviteCleanupWorker` Oban job: delete expired pending invitations, notify admins if configured
+- [x] 8.1 Build tenant admin LiveView: `/:tenant_slug/admin` — tabbed layout: players, games, config, legal, GDPR
+- [x] 8.2 Build player invite by email form (emits `PlayerInvited`, sends magic link)
+- [x] 8.3 Build pending players list (invited, not activated) with resend magic link and delete actions
+- [x] 8.4 Build invite link management section in admin panel: show full URL + Copy button; inline expiry date field (set or clear); Rotate button with inline confirmation prompt ("Rotate invite link? The current link will stop working immediately.") — invalidates old token, generates new one, displays new URL in place; "Generate invite link" initial state when no token exists yet; hide entire section if tenant self-registration is disabled
+- [x] 8.5 Build tenant config form (rounds_to_win, points_per_round, confirmation_mode, auto_confirm_after_hours, retention_period_days, notify_admin_on_invite_expiry, default_locale, deletion_grace_period_hours, app_name, custom_domain); add DB unique index on `custom_domain`; add changeset uniqueness validation with user-facing error; add inline notice below `custom_domain` field explaining the DNS + operator Caddy steps required (always visible, not conditional)
+- [x] 8.6 Build player deletion UI with confirmation step
+- [x] 8.7 Build tenant admin role grant/revoke UI
+- [x] 8.8 Build GDPR audit log view for tenant admins
+- [x] 8.9 Build tenant deletion UI: initiation form, 4-eyes pending state, grace period countdown, cancel action
+- [x] 8.10 Implement `ExpiredInviteCleanupWorker` Oban job: delete expired pending invitations, notify admins if configured
 
 ## 9. Game Logging
 

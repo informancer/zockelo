@@ -19,7 +19,7 @@ config :eventstore,
 config :zockelo, event_stores: [Zockelo.EventStore]
 
 config :zockelo, Zockelo.EventStore,
-  serializer: EventStore.JsonbSerializer
+  serializer: EventStore.JsonSerializer
 
 # Commanded application
 config :zockelo, Zockelo.CommandedApp,

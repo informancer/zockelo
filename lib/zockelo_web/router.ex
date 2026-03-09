@@ -26,6 +26,11 @@ defmodule ZockeloWeb.Router do
     plug ZockeloWeb.Plugs.RequireSuperAdminPlug
   end
 
+  # Requires tenant admin or super admin role.
+  pipeline :require_tenant_admin do
+    plug ZockeloWeb.Plugs.RequireTenantAdminPlug
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -42,6 +47,13 @@ defmodule ZockeloWeb.Router do
     get "/", PageController, :home
     get "/manifest.json", ManifestController, :show
     get "/:tenant_slug/manifest.json", ManifestController, :show
+  end
+
+  # Tenant admin panel — /:tenant_slug/admin
+  scope "/:tenant_slug", ZockeloWeb.TenantAdmin do
+    pipe_through [:browser, :require_auth, :require_tenant, :require_tenant_admin]
+
+    live "/admin", AdminLive
   end
 
   # Super admin panel — /admin/*

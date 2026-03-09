@@ -15,8 +15,9 @@ defmodule Zockelo.Application do
       {Phoenix.PubSub, name: Zockelo.PubSub},
       # CommandedApp supervises EventStore internally via the adapter
       Zockelo.CommandedApp,
-      # Event handlers
+      # Event handlers / projections started by Commanded
       Zockelo.Workers.TenantDeletionScheduler,
+      Zockelo.Projections.PlayerProfileProjection,
       # Background jobs
       {Oban, Application.fetch_env!(:zockelo, Oban)},
       # Start to serve requests, typically the last entry
