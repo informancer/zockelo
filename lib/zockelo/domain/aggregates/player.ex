@@ -11,12 +11,14 @@ defmodule Zockelo.Domain.Aggregates.Player do
   Key management and crypto-shredding are handled by the Zockelo.Crypto context.
   """
 
-  alias Zockelo.Domain.Commands.{InvitePlayer, ActivatePlayer, DeletePlayer}
+  alias Zockelo.Domain.Commands.{InvitePlayer, ActivatePlayer, DeletePlayer, UpdatePlayerName, ChangePlayerEmail}
 
   alias Zockelo.Domain.Events.{
     PlayerInvited,
     PlayerActivated,
-    PlayerDeleted
+    PlayerDeleted,
+    PlayerNameChanged,
+    PlayerEmailChanged
   }
 
   defstruct [
@@ -64,6 +66,24 @@ defmodule Zockelo.Domain.Aggregates.Player do
     {:error, :already_deleted}
   end
 
+  def execute(%__MODULE__{status: :active}, %UpdatePlayerName{} = cmd) do
+    %PlayerNameChanged.V1{
+      player_id: cmd.player_id,
+      tenant_id: cmd.tenant_id,
+      encrypted_name: cmd.encrypted_name,
+      changed_at: DateTime.utc_now()
+    }
+  end
+
+  def execute(%__MODULE__{status: :active}, %ChangePlayerEmail{} = cmd) do
+    %PlayerEmailChanged.V1{
+      player_id: cmd.player_id,
+      tenant_id: cmd.tenant_id,
+      encrypted_email: cmd.encrypted_email,
+      changed_at: DateTime.utc_now()
+    }
+  end
+
   def execute(%__MODULE__{status: status}, cmd) do
     {:error, {:invalid_state, "Cannot execute #{inspect(cmd.__struct__)} in state #{inspect(status)}"}}
   end
@@ -83,4 +103,7 @@ defmodule Zockelo.Domain.Aggregates.Player do
   def apply(%__MODULE__{} = player, %PlayerDeleted.V1{}) do
     %{player | status: :deleted}
   end
+
+  def apply(%__MODULE__{} = player, %PlayerNameChanged.V1{}), do: player
+  def apply(%__MODULE__{} = player, %PlayerEmailChanged.V1{}), do: player
 end

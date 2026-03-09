@@ -9,13 +9,16 @@ defmodule Zockelo.Auth.MagicLinkToken do
     field :token_hash, :string
     field :expires_at, :utc_datetime_usec
     field :used_at, :utc_datetime_usec
+    field :token_type, :string, default: "login"
+    field :new_email_encrypted, :binary
 
     timestamps(type: :utc_datetime_usec)
   end
 
   def changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:player_id, :tenant_id, :token_hash, :expires_at, :used_at])
+    |> cast(attrs, [:player_id, :tenant_id, :token_hash, :expires_at, :used_at,
+                    :token_type, :new_email_encrypted])
     |> validate_required([:player_id, :tenant_id, :token_hash, :expires_at])
     |> unique_constraint(:token_hash)
   end

@@ -1,6 +1,6 @@
 defmodule Zockelo.Games do
   @moduledoc """
-  Context for game logging and retrieval.
+  Context for game logging, confirmation flow, and retrieval.
   """
 
   import Ecto.Query
@@ -8,7 +8,14 @@ defmodule Zockelo.Games do
   alias Zockelo.Repo
   alias Zockelo.CommandedApp
   alias Zockelo.Projections.{GameRead, GameRound, PlayerProfile, PlayerRating}
-  alias Zockelo.Domain.Commands.LogGame
+
+  alias Zockelo.Domain.Commands.{
+    LogGame,
+    ConfirmGame,
+    DisputeGame,
+    ReinstateGame,
+    VoidGame
+  }
 
   # ---------------------------------------------------------------------------
   # Logging
@@ -28,6 +35,7 @@ defmodule Zockelo.Games do
   """
   def log_game(attrs) do
     game_id = Ecto.UUID.generate()
+    mode = parse_mode(attrs.confirmation_mode)
 
     cmd = %LogGame{
       game_id: game_id,
@@ -36,15 +44,139 @@ defmodule Zockelo.Games do
       team1_players: attrs.team1_players,
       team2_players: attrs.team2_players,
       rounds: normalize_rounds(attrs.rounds),
-      confirmation_mode: parse_mode(attrs.confirmation_mode),
+      confirmation_mode: mode,
       rounds_to_win: attrs.rounds_to_win,
       points_per_round: attrs.points_per_round
     }
 
     case CommandedApp.dispatch(cmd) do
-      :ok -> {:ok, game_id}
-      {:error, reason} -> {:error, reason}
+      :ok ->
+        # Dual-write for synchronous read consistency.
+        # GameHistoryProjection handles async event replay (idempotent upsert).
+        initial_status = if mode == :trust, do: "confirmed", else: "pending"
+
+        Repo.insert(
+          %GameRead{
+            id: game_id,
+            tenant_id: attrs.tenant_id,
+            logged_by: attrs.logged_by,
+            team1_players: attrs.team1_players,
+            team2_players: attrs.team2_players,
+            status: initial_status,
+            confirmation_mode: to_string(mode),
+            rounds_to_win: attrs.rounds_to_win,
+            points_per_round: attrs.points_per_round,
+            logged_at: DateTime.utc_now()
+          },
+          on_conflict: :nothing,
+          conflict_target: :id
+        )
+
+        {:ok, game_id}
+
+      {:error, reason} ->
+        {:error, reason}
     end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Confirmation flow
+  # ---------------------------------------------------------------------------
+
+  @doc "Confirms a pending game. Returns :ok or {:error, reason}."
+  def confirm_game(game_id, confirmed_by) do
+    with %GameRead{tenant_id: tid, status: "pending"} <- Repo.get(GameRead, game_id) do
+      case CommandedApp.dispatch(%ConfirmGame{
+             game_id: game_id,
+             tenant_id: tid,
+             confirmed_by: confirmed_by
+           }) do
+        :ok -> :ok
+        err -> err
+      end
+    else
+      nil -> {:error, :not_found}
+      %GameRead{} -> {:error, :invalid_status}
+    end
+  end
+
+  @doc "Disputes a pending game. Returns :ok or {:error, reason}."
+  def dispute_game(game_id, disputed_by, reason \\ nil) do
+    with %GameRead{tenant_id: tid, status: "pending"} <- Repo.get(GameRead, game_id) do
+      case CommandedApp.dispatch(%DisputeGame{
+             game_id: game_id,
+             tenant_id: tid,
+             disputed_by: disputed_by,
+             reason: reason
+           }) do
+        :ok -> :ok
+        err -> err
+      end
+    else
+      nil -> {:error, :not_found}
+      %GameRead{} -> {:error, :invalid_status}
+    end
+  end
+
+  @doc "Reinstates a disputed game (tenant admin only). Returns :ok or {:error, reason}."
+  def reinstate_game(game_id, reinstated_by) do
+    with %GameRead{tenant_id: tid, status: "disputed"} <- Repo.get(GameRead, game_id) do
+      case CommandedApp.dispatch(%ReinstateGame{
+             game_id: game_id,
+             tenant_id: tid,
+             reinstated_by: reinstated_by
+           }) do
+        :ok -> :ok
+        err -> err
+      end
+    else
+      nil -> {:error, :not_found}
+      %GameRead{} -> {:error, :invalid_status}
+    end
+  end
+
+  @doc "Voids a pending or disputed game. Returns :ok or {:error, reason}."
+  def void_game(game_id, voided_by) do
+    with %GameRead{tenant_id: tid, status: s} when s in ["pending", "disputed"] <-
+           Repo.get(GameRead, game_id) do
+      case CommandedApp.dispatch(%VoidGame{
+             game_id: game_id,
+             tenant_id: tid,
+             voided_by: voided_by
+           }) do
+        :ok -> :ok
+        err -> err
+      end
+    else
+      nil -> {:error, :not_found}
+      %GameRead{} -> {:error, :invalid_status}
+    end
+  end
+
+  @doc """
+  Voids all pending and disputed games that include `player_id`.
+  Used during player deletion to clean up incomplete games.
+  """
+  def void_player_games(player_id, tenant_id, voided_by) do
+    games =
+      Repo.all(
+        from g in GameRead,
+          where:
+            g.tenant_id == ^tenant_id and
+              g.status in ["pending", "disputed"] and
+              (fragment("? = ANY(?)", type(^player_id, :binary_id), g.team1_players) or
+                 fragment("? = ANY(?)", type(^player_id, :binary_id), g.team2_players))
+      )
+
+    Enum.each(games, fn game ->
+      CommandedApp.dispatch(%VoidGame{
+        game_id: game.id,
+        tenant_id: tenant_id,
+        voided_by: voided_by
+      })
+    end)
+
+    :ok
   end
 
   # ---------------------------------------------------------------------------
@@ -53,7 +185,7 @@ defmodule Zockelo.Games do
 
   @doc """
   Returns `[{PlayerProfile, PlayerRating}]` for all active players in a tenant,
-  sorted by rating descending.
+  sorted by rating DESC, games_played DESC, name ASC.
   """
   def list_active_players_with_ratings(tenant_id) do
     profiles =
@@ -67,17 +199,35 @@ defmodule Zockelo.Games do
         from r in PlayerRating,
           where: r.tenant_id == ^tenant_id
       )
-      |> Map.new(& {&1.player_id, &1})
+      |> Map.new(&{&1.player_id, &1})
 
     profiles
     |> Enum.map(fn p ->
-      rating = Map.get(ratings_map, p.player_id, %PlayerRating{
-        player_id: p.player_id, tenant_id: tenant_id, rating: 1000,
-        games_played: 0, wins: 0, losses: 0
-      })
+      rating =
+        Map.get(ratings_map, p.player_id, %PlayerRating{
+          player_id: p.player_id,
+          tenant_id: tenant_id,
+          rating: 1000,
+          games_played: 0,
+          wins: 0,
+          losses: 0
+        })
+
       {p, rating}
     end)
-    |> Enum.sort_by(fn {_p, r} -> -r.rating end)
+    |> Enum.sort_by(fn {p, r} ->
+      name =
+        if p.encrypted_name do
+          case Zockelo.Crypto.decrypt_field(p.player_id, p.encrypted_name) do
+            {:ok, n} -> n
+            _ -> ""
+          end
+        else
+          ""
+        end
+
+      {-r.rating, -r.games_played, name}
+    end)
   end
 
   @doc "Returns all GameRead rows for a tenant, newest first."
@@ -86,6 +236,82 @@ defmodule Zockelo.Games do
       from g in GameRead,
         where: g.tenant_id == ^tenant_id,
         order_by: [desc: g.logged_at]
+    )
+  end
+
+  @page_size 20
+
+  @doc """
+  Returns a page of games for a tenant, with optional filters.
+
+  Options:
+    - `:player_id` — UUID string; only games where the player is a participant
+    - `:date_from` — `Date` or `nil`; filter games logged on or after this date
+    - `:date_to`   — `Date` or `nil`; filter games logged on or before this date
+    - `:page`      — 0-based page index (default 0)
+  """
+  def list_games_page(tenant_id, opts \\ []) do
+    player_id = Keyword.get(opts, :player_id)
+    date_from = Keyword.get(opts, :date_from)
+    date_to = Keyword.get(opts, :date_to)
+    page = max(Keyword.get(opts, :page, 0), 0)
+
+    base =
+      from g in GameRead,
+        where: g.tenant_id == ^tenant_id,
+        order_by: [desc: g.logged_at]
+
+    base =
+      if player_id do
+        from g in base,
+          where:
+            fragment("? = ANY(?)", type(^player_id, :binary_id), g.team1_players) or
+              fragment("? = ANY(?)", type(^player_id, :binary_id), g.team2_players)
+      else
+        base
+      end
+
+    base =
+      if date_from do
+        from g in base, where: g.logged_at >= ^DateTime.new!(date_from, ~T[00:00:00])
+      else
+        base
+      end
+
+    base =
+      if date_to do
+        from g in base, where: g.logged_at <= ^DateTime.new!(date_to, ~T[23:59:59])
+      else
+        base
+      end
+
+    total = Repo.aggregate(base, :count)
+
+    games =
+      Repo.all(
+        from g in base,
+          limit: ^@page_size,
+          offset: ^(page * @page_size)
+      )
+
+    %{games: games, page: page, page_size: @page_size, total: total}
+  end
+
+  @doc "Returns pending GameRead rows for a tenant, oldest first."
+  def list_pending_games(tenant_id) do
+    Repo.all(
+      from g in GameRead,
+        where: g.tenant_id == ^tenant_id and g.status == "pending",
+        order_by: [asc: g.logged_at]
+    )
+  end
+
+  @doc "Returns disputed GameRead rows for a tenant, oldest first."
+  def list_disputed_games(tenant_id) do
+    Repo.all(
+      from g in GameRead,
+        where: g.tenant_id == ^tenant_id and g.status == "disputed",
+        order_by: [asc: g.logged_at]
     )
   end
 

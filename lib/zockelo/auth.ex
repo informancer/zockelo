@@ -74,6 +74,62 @@ defmodule Zockelo.Auth do
     end
   end
 
+  @doc """
+  Generates an email-change verification token. Sends a magic link to `new_email`.
+  The token stores the new encrypted email so it can be applied on verification.
+  Returns `{:ok, raw_token}`.
+  """
+  def generate_email_change_link(player_id, tenant_id, new_email, new_email_encrypted) do
+    raw_token = generate_token()
+    token_hash = hash_token(raw_token)
+    expires_at = DateTime.add(DateTime.utc_now(), @token_ttl_seconds, :second)
+
+    {:ok, _} =
+      Repo.insert(MagicLinkToken.changeset(%{
+        player_id: player_id,
+        tenant_id: tenant_id,
+        token_hash: token_hash,
+        expires_at: expires_at,
+        token_type: "email_change",
+        new_email_encrypted: new_email_encrypted
+      }))
+
+    magic_url = build_email_change_url(tenant_id, raw_token)
+
+    new_email
+    |> Email.magic_link(magic_url)
+    |> Mailer.deliver()
+
+    {:ok, raw_token}
+  end
+
+  @doc """
+  Verifies an email-change token. Returns `{:ok, player_id, new_email_encrypted}`
+  or `{:error, reason}`.
+  """
+  def verify_email_change_token(raw_token) do
+    token_hash = hash_token(raw_token)
+
+    case Repo.get_by(MagicLinkToken, token_hash: token_hash, token_type: "email_change") do
+      nil ->
+        {:error, :not_found}
+
+      %MagicLinkToken{used_at: used_at} when not is_nil(used_at) ->
+        {:error, :already_used}
+
+      %MagicLinkToken{expires_at: expires_at} = token ->
+        if DateTime.before?(DateTime.utc_now(), expires_at) do
+          Repo.update_all(
+            from(t in MagicLinkToken, where: t.id == ^token.id),
+            set: [used_at: DateTime.utc_now()]
+          )
+          {:ok, token.player_id, token.tenant_id, token.new_email_encrypted}
+        else
+          {:error, :expired}
+        end
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # Sessions
   # ---------------------------------------------------------------------------
@@ -215,5 +271,10 @@ defmodule Zockelo.Auth do
   defp build_magic_url(_tenant_id, raw_token) do
     host = Application.get_env(:zockelo, :magic_link_base_url, "http://localhost:4000")
     "#{host}/auth/magic?token=#{raw_token}"
+  end
+
+  defp build_email_change_url(_tenant_id, raw_token) do
+    host = Application.get_env(:zockelo, :magic_link_base_url, "http://localhost:4000")
+    "#{host}/auth/email-change?token=#{raw_token}"
   end
 end

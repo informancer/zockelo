@@ -44,15 +44,29 @@ defmodule ZockeloWeb.Router do
   scope "/", ZockeloWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive
     get "/manifest.json", ManifestController, :show
     get "/:tenant_slug/manifest.json", ManifestController, :show
+
+    # Email change confirmation — accessible while optionally authenticated
+    live "/auth/email-change", EmailChangeLive
+  end
+
+  # Tenant public pages — no auth required
+  scope "/:tenant_slug", ZockeloWeb.Tenant do
+    pipe_through :browser
+
+    live "/login", LoginLive
   end
 
   # Tenant pages — /:tenant_slug/*
   scope "/:tenant_slug", ZockeloWeb.Tenant do
     pipe_through [:browser, :require_auth, :require_tenant]
 
+    live "/", DashboardLive
+    live "/leaderboard", LeaderboardLive
+    live "/players/:player_id", PlayerProfileLive
+    live "/settings", ProfileSettingsLive
     live "/games", GamesLive
     live "/games/new", GameNewLive
   end

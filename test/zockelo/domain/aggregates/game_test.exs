@@ -220,9 +220,9 @@ defmodule Zockelo.Domain.Aggregates.GameTest do
       assert {:error, :already_voided} = Game.execute(voided, cmd)
     end
 
-    test "cannot void a pending game" do
+    test "can void a pending game directly (used during player deletion)" do
       cmd = %VoidGame{game_id: @game_id, tenant_id: @tenant_id, voided_by: "admin"}
-      assert {:error, _} = Game.execute(pending_game(), cmd)
+      assert %GameVoided.V1{} = Game.execute(pending_game(), cmd)
     end
   end
 

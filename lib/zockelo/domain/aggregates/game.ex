@@ -99,7 +99,7 @@ defmodule Zockelo.Domain.Aggregates.Game do
     }
   end
 
-  def execute(%__MODULE__{status: :disputed}, %VoidGame{} = cmd) do
+  def execute(%__MODULE__{status: status}, %VoidGame{} = cmd) when status in [:pending, :disputed] do
     %GameVoided.V1{
       game_id: cmd.game_id,
       tenant_id: cmd.tenant_id,

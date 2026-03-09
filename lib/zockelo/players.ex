@@ -17,7 +17,9 @@ defmodule Zockelo.Players do
   alias Zockelo.Domain.Commands.{
     InvitePlayer,
     DeletePlayer,
-    UpdateTenantConfig
+    UpdateTenantConfig,
+    UpdatePlayerName,
+    ChangePlayerEmail
   }
 
   # ---------------------------------------------------------------------------
@@ -86,6 +88,9 @@ defmodule Zockelo.Players do
   revokes sessions and tokens.
   """
   def delete_player(player_id, tenant_id, deleted_by) do
+    # Void any pending/disputed games for this player before deleting.
+    :ok = Zockelo.Games.void_player_games(player_id, tenant_id, deleted_by)
+
     :ok = CommandedApp.dispatch(%DeletePlayer{
       player_id: player_id,
       tenant_id: tenant_id,
@@ -152,6 +157,65 @@ defmodule Zockelo.Players do
       nil -> %{}
       tenant -> tenant.config || %{}
     end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Profile updates
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Updates a player's display name. Encrypts the name, dispatches `UpdatePlayerName`,
+  and directly updates `player_profiles` for sync read consistency.
+  """
+  def update_player_name(player_id, tenant_id, name) do
+    with {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
+      encrypted_name_b64 = Base.encode64(encrypted_name_bin)
+
+      :ok = CommandedApp.dispatch(%UpdatePlayerName{
+        player_id: player_id,
+        tenant_id: tenant_id,
+        encrypted_name: encrypted_name_b64
+      })
+
+      Repo.update_all(
+        from(p in PlayerProfile, where: p.player_id == ^player_id),
+        set: [encrypted_name: encrypted_name_bin]
+      )
+
+      :ok
+    end
+  end
+
+  @doc """
+  Initiates an email change by sending a verification link to `new_email`.
+  The new email is encrypted and stored in the verification token.
+  On confirmation, call `confirm_email_change/2`.
+  """
+  def initiate_email_change(player_id, tenant_id, new_email) do
+    with {:ok, encrypted_email_bin} <- Crypto.encrypt_field(player_id, new_email) do
+      Auth.generate_email_change_link(player_id, tenant_id, new_email, encrypted_email_bin)
+    end
+  end
+
+  @doc """
+  Confirms an email change after verifying the token. Dispatches `ChangePlayerEmail`
+  and directly updates `player_profiles`.
+  """
+  def confirm_email_change(player_id, tenant_id, encrypted_email_bin) do
+    encrypted_email_b64 = Base.encode64(encrypted_email_bin)
+
+    :ok = CommandedApp.dispatch(%ChangePlayerEmail{
+      player_id: player_id,
+      tenant_id: tenant_id,
+      encrypted_email: encrypted_email_b64
+    })
+
+    Repo.update_all(
+      from(p in PlayerProfile, where: p.player_id == ^player_id),
+      set: [encrypted_email: encrypted_email_bin]
+    )
+
+    :ok
   end
 
   # ---------------------------------------------------------------------------

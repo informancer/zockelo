@@ -11,6 +11,11 @@ defmodule ZockeloWeb.Live.AuthHooks do
 
   alias Zockelo.Auth
 
+  # Loads the session without redirecting — unauthenticated sockets get current_session: nil.
+  def on_mount(:load_session, _params, session, socket) do
+    {:cont, mount_session(socket, session)}
+  end
+
   def on_mount(:require_authenticated, params, session, socket) do
     socket = mount_session(socket, session)
 

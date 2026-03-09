@@ -30,3 +30,15 @@ defmodule Zockelo.Domain.Commands.DeletePlayer do
   @enforce_keys [:player_id, :tenant_id, :deleted_by]
   defstruct [:player_id, :tenant_id, :deleted_by]
 end
+
+defmodule Zockelo.Domain.Commands.UpdatePlayerName do
+  @moduledoc "Update a player's display name. `encrypted_name` must be pre-encrypted."
+  @enforce_keys [:player_id, :tenant_id, :encrypted_name]
+  defstruct [:player_id, :tenant_id, :encrypted_name]
+end
+
+defmodule Zockelo.Domain.Commands.ChangePlayerEmail do
+  @moduledoc "Change a player's email after verification. `encrypted_email` must be pre-encrypted."
+  @enforce_keys [:player_id, :tenant_id, :encrypted_email]
+  defstruct [:player_id, :tenant_id, :encrypted_email]
+end

@@ -102,34 +102,34 @@
 
 ## 10. Game Confirmation Flow
 
-- [ ] 10.1 Implement `GameConfirmationWorker` Oban job: query pending games past `auto_confirm_after_hours`, dispatch `ConfirmGame` command
-- [ ] 10.2 Build pending games UI on leaderboard/games page (confirm/dispute buttons for participants and admins)
-- [ ] 10.3 Implement confirm action (dispatch `ConfirmGame` command, authorize: participant or tenant admin)
-- [ ] 10.4 Implement dispute action (dispatch `DisputeGame` command, authorize: participant or tenant admin)
-- [ ] 10.5 Build disputed games queue in tenant admin panel with reinstate/void actions
-- [ ] 10.6 Implement reinstate action (dispatch `ReinstateGame`, tenant admin only)
-- [ ] 10.7 Implement void action (dispatch `VoidGame`, tenant admin only)
-- [ ] 10.8 During player deletion flow, query all pending/disputed games where the deleted player is a participant and dispatch `VoidGame` for each; include in the deletion Oban job or deletion command handler
-- [ ] 10.9 Apply leaderboard sort order: rating DESC, games_played DESC, player_name ASC
+- [x] 10.1 Implement `GameConfirmationWorker` Oban job: query pending games past `auto_confirm_after_hours`, dispatch `ConfirmGame` command
+- [x] 10.2 Build pending games UI on leaderboard/games page (confirm/dispute buttons for participants and admins)
+- [x] 10.3 Implement confirm action (dispatch `ConfirmGame` command, authorize: participant or tenant admin)
+- [x] 10.4 Implement dispute action (dispatch `DisputeGame` command, authorize: participant or tenant admin)
+- [x] 10.5 Build disputed games queue in tenant admin panel with reinstate/void actions
+- [x] 10.6 Implement reinstate action (dispatch `ReinstateGame`, tenant admin only)
+- [x] 10.7 Implement void action (dispatch `VoidGame`, tenant admin only)
+- [x] 10.8 During player deletion flow, query all pending/disputed games where the deleted player is a participant and dispatch `VoidGame` for each; include in the deletion Oban job or deletion command handler
+- [x] 10.9 Apply leaderboard sort order: rating DESC, games_played DESC, player_name ASC
 
 ## 11. Dashboard, Leaderboard and Player Profiles
 
-- [ ] 11.1 Build dashboard LiveView: `/:tenant_slug/` — mini leaderboard, current player stats, recent games, pending games, tenant stats, team balancer widget
-- [ ] 11.2 Implement team balancer algorithm: evaluate all pairings for 2/3/4 players, return fairest split with team averages and expected score
-- [ ] 11.3 Build team balancer widget component: toggleable player chips, suggested split display, "Log this game" button that pre-fills game logging form
-- [ ] 11.4 Add player filter and date-range filter to game history LiveView; reflect active filters in URL query string for bookmarkable/shareable filtered views; combine filters in Ecto query
-- [ ] 11.5 Build navigation components: bottom nav bar (mobile), top nav bar (desktop), user menu with admin panel link; display tenant `app_name` (fallback: "Zockelo") in nav header and page `<title>` tags
-- [ ] 11.6 Build leaderboard LiveView: `/:tenant_slug/leaderboard` with real-time PubSub subscription
-- [ ] 11.7 Publish PubSub message on ratings projection update to trigger leaderboard and dashboard refresh; use component-level assigns to push only changed player rows
-- [ ] 11.8 Build game history LiveView: `/:tenant_slug/games` with pagination
-- [ ] 11.9 Build player profile LiveView: `/:tenant_slug/players/:player_id` with rating history list and Chart.js rating line chart via LiveView JS hook (responsive, tooltip with date/opponents/rating change on tap/hover)
-- [ ] 11.10 Build profile settings LiveView: name/email editing, notification preferences, data export, account deletion
-- [ ] 11.11 Implement `PlayerUpdated` event and handler for name change (re-encrypt with existing key)
-- [ ] 11.12 Implement email change flow: send verification link to new email, `PlayerEmailChanged` event on confirmation
-- [ ] 11.13 Implement deleted player placeholder rendering (`[Deleted Player]`) across all views
-- [ ] 11.14 Implement GDPR data export: query profile + game history + admin_audit_log entries where player is actor_id, decrypt PII, serialize to JSON, trigger download
-- [ ] 11.15 Implement player self-deletion in profile settings: confirmation dialog ("this cannot be undone"), dispatch `DeletePlayer` command on confirm, follow identical crypto-shredding flow as admin deletion, log out and redirect to login page on completion
-- [ ] 11.16 Build root landing page LiveView (`/`): state-machine routing — (a) no super admin exists → "Getting started" page with setup instructions and release eval command; (b) super admin exists, no tenants, requesting user is super admin → redirect `/admin`; (c) super admin exists, no tenants, unauthenticated → "No leagues available yet" page; (d) tenants exist, authenticated player → redirect `/:tenant_slug/`; (e) tenants exist, authenticated super admin → redirect `/admin`; (f) tenants exist, unauthenticated → neutral "Enter your league URL" branded page with slug input that navigates to `/:slug/login` on submit; same neutral page shown regardless of how many tenants exist
+- [x] 11.1 Build dashboard LiveView: `/:tenant_slug/` — mini leaderboard, current player stats, recent games, pending games, tenant stats, team balancer widget
+- [x] 11.2 Implement team balancer algorithm: evaluate all pairings for 2/3/4 players, return fairest split with team averages and expected score
+- [x] 11.3 Build team balancer widget component: toggleable player chips, suggested split display, "Log this game" button that pre-fills game logging form
+- [x] 11.4 Add player filter and date-range filter to game history LiveView; reflect active filters in URL query string for bookmarkable/shareable filtered views; combine filters in Ecto query
+- [x] 11.5 Build navigation components: bottom nav bar (mobile), top nav bar (desktop), user menu with admin panel link; display tenant `app_name` (fallback: "Zockelo") in nav header and page `<title>` tags
+- [x] 11.6 Build leaderboard LiveView: `/:tenant_slug/leaderboard` with real-time PubSub subscription
+- [x] 11.7 Publish PubSub message on ratings projection update to trigger leaderboard and dashboard refresh; use component-level assigns to push only changed player rows
+- [x] 11.8 Build game history LiveView: `/:tenant_slug/games` with pagination
+- [x] 11.9 Build player profile LiveView: `/:tenant_slug/players/:player_id` with rating history list and Chart.js rating line chart via LiveView JS hook (responsive, tooltip with date/opponents/rating change on tap/hover)
+- [x] 11.10 Build profile settings LiveView: name/email editing, notification preferences, data export, account deletion
+- [x] 11.11 Implement `PlayerUpdated` event and handler for name change (re-encrypt with existing key)
+- [x] 11.12 Implement email change flow: send verification link to new email, `PlayerEmailChanged` event on confirmation
+- [x] 11.13 Implement deleted player placeholder rendering (`[Deleted Player]`) across all views
+- [x] 11.14 Implement GDPR data export: query profile + game history + admin_audit_log entries where player is actor_id, decrypt PII, serialize to JSON, trigger download
+- [x] 11.15 Implement player self-deletion in profile settings: confirmation dialog ("this cannot be undone"), dispatch `DeletePlayer` command on confirm, follow identical crypto-shredding flow as admin deletion, log out and redirect to login page on completion
+- [x] 11.16 Build root landing page LiveView (`/`): state-machine routing — (a) no super admin exists → "Getting started" page with setup instructions and release eval command; (b) super admin exists, no tenants, requesting user is super admin → redirect `/admin`; (c) super admin exists, no tenants, unauthenticated → "No leagues available yet" page; (d) tenants exist, authenticated player → redirect `/:tenant_slug/`; (e) tenants exist, authenticated super admin → redirect `/admin`; (f) tenants exist, unauthenticated → neutral "Enter your league URL" branded page with slug input that navigates to `/:slug/login` on submit; same neutral page shown regardless of how many tenants exist
 
 ## 12. In-app Help
 

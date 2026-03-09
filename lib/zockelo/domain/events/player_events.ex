@@ -41,3 +41,21 @@ defmodule Zockelo.Domain.Events.PlayerDeleted do
     defstruct [:player_id, :tenant_id, :deleted_by, :deleted_at]
   end
 end
+
+defmodule Zockelo.Domain.Events.PlayerNameChanged do
+  @moduledoc "Emitted when a player updates their display name."
+  defmodule V1 do
+    @derive Jason.Encoder
+    @enforce_keys [:player_id, :tenant_id, :encrypted_name, :changed_at]
+    defstruct [:player_id, :tenant_id, :encrypted_name, :changed_at]
+  end
+end
+
+defmodule Zockelo.Domain.Events.PlayerEmailChanged do
+  @moduledoc "Emitted after a player confirms their new email address."
+  defmodule V1 do
+    @derive Jason.Encoder
+    @enforce_keys [:player_id, :tenant_id, :encrypted_email, :changed_at]
+    defstruct [:player_id, :tenant_id, :encrypted_email, :changed_at]
+  end
+end

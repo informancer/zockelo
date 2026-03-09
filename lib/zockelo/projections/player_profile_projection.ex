@@ -11,7 +11,9 @@ defmodule Zockelo.Projections.PlayerProfileProjection do
   alias Zockelo.Domain.Events.{
     PlayerInvited,
     PlayerActivated,
-    PlayerDeleted
+    PlayerDeleted,
+    PlayerNameChanged,
+    PlayerEmailChanged
   }
 
   project(%PlayerInvited.V1{} = e, _meta, fn multi ->
@@ -40,6 +42,22 @@ defmodule Zockelo.Projections.PlayerProfileProjection do
     Ecto.Multi.update_all(multi, :profile,
       from(p in PlayerProfile, where: p.player_id == ^e.player_id),
       set: [status: "deleted"]
+    )
+  end)
+
+  project(%PlayerNameChanged.V1{} = e, _meta, fn multi ->
+    encrypted_name = decode_b64(e.encrypted_name)
+    Ecto.Multi.update_all(multi, :profile,
+      from(p in PlayerProfile, where: p.player_id == ^e.player_id),
+      set: [encrypted_name: encrypted_name]
+    )
+  end)
+
+  project(%PlayerEmailChanged.V1{} = e, _meta, fn multi ->
+    encrypted_email = decode_b64(e.encrypted_email)
+    Ecto.Multi.update_all(multi, :profile,
+      from(p in PlayerProfile, where: p.player_id == ^e.player_id),
+      set: [encrypted_email: encrypted_email]
     )
   end)
 

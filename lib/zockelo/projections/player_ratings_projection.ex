@@ -63,6 +63,10 @@ defmodule Zockelo.Projections.PlayerRatingsProjection do
   # Private
   # ---------------------------------------------------------------------------
 
+  defp broadcast_ratings_updated(tenant_id) do
+    Phoenix.PubSub.broadcast(Zockelo.PubSub, "tenant:#{tenant_id}:ratings", :ratings_updated)
+  end
+
   defp apply_elo(repo, game_id, tenant_id, team1_ids, team2_ids, rounds) do
     team1 = load_players(repo, team1_ids)
     team2 = load_players(repo, team2_ids)
@@ -98,6 +102,7 @@ defmodule Zockelo.Projections.PlayerRatingsProjection do
       )
     end
 
+    broadcast_ratings_updated(tenant_id)
     {:ok, :done}
   end
 

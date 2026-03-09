@@ -6,14 +6,14 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
   """
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Players, Auth}
+  alias Zockelo.{Players, Auth, Games}
   alias Zockelo.Auth.InviteLink
   alias Zockelo.Crypto.GdprKeyDeletion
   alias Zockelo.Repo
 
   import Ecto.Query
 
-  @tabs ~w(players config invite_links gdpr deletion)
+  @tabs ~w(players config invite_links gdpr disputed_games deletion)
 
   @impl true
   def mount(%{"tenant_slug" => _slug}, _session, socket) do
@@ -194,6 +194,40 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
   end
 
   # ---------------------------------------------------------------------------
+  # Disputed games tab events
+  # ---------------------------------------------------------------------------
+
+  def handle_event("reinstate_game", %{"game_id" => game_id}, socket) do
+    admin_id = socket.assigns.current_user.player_id
+
+    case Games.reinstate_game(game_id, admin_id) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Game reinstated.")
+         |> load_tab("disputed_games")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Error: #{inspect(reason)}")}
+    end
+  end
+
+  def handle_event("void_game", %{"game_id" => game_id}, socket) do
+    admin_id = socket.assigns.current_user.player_id
+
+    case Games.void_game(game_id, admin_id) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Game voided.")
+         |> load_tab("disputed_games")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Error: #{inspect(reason)}")}
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Tenant deletion tab events
   # ---------------------------------------------------------------------------
 
@@ -250,6 +284,7 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
           <.tab_link tab="config" current={@tab} slug={@tenant.slug}>Config</.tab_link>
           <.tab_link tab="invite_links" current={@tab} slug={@tenant.slug}>Invite Links</.tab_link>
           <.tab_link tab="gdpr" current={@tab} slug={@tenant.slug}>GDPR Audit</.tab_link>
+          <.tab_link tab="disputed_games" current={@tab} slug={@tenant.slug}>Disputes</.tab_link>
           <.tab_link tab="deletion" current={@tab} slug={@tenant.slug}>Danger Zone</.tab_link>
         </nav>
       </div>
@@ -259,6 +294,7 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
         <% "config" -> %><%= render_config(assigns) %>
         <% "invite_links" -> %><%= render_invite_links(assigns) %>
         <% "gdpr" -> %><%= render_gdpr(assigns) %>
+        <% "disputed_games" -> %><%= render_disputed_games(assigns) %>
         <% "deletion" -> %><%= render_deletion(assigns) %>
       <% end %>
     </div>
@@ -582,9 +618,44 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
     assign(socket, :gdpr_log, log)
   end
 
+  defp load_tab(socket, "disputed_games") do
+    tenant_id = socket.assigns.tenant.id
+    assign(socket, :disputed_games, Games.list_disputed_games(tenant_id))
+  end
+
   defp load_tab(socket, "deletion"), do: socket
 
   defp load_tab(socket, _), do: socket
+
+  defp render_disputed_games(assigns) do
+    ~H"""
+    <div class="space-y-4">
+      <h2 class="text-lg font-semibold">Disputed Games</h2>
+      <%= if @disputed_games == [] do %>
+        <p class="text-gray-500">No disputed games.</p>
+      <% else %>
+        <div class="space-y-3">
+          <%= for game <- @disputed_games do %>
+            <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-mono text-gray-500"><%= game.id %></span>
+                <span class="text-xs text-gray-400">
+                  <%= Calendar.strftime(game.logged_at, "%Y-%m-%d %H:%M") %>
+                </span>
+              </div>
+              <div class="flex gap-2 mt-2">
+                <button phx-click="reinstate_game" phx-value-game_id={game.id}
+                        class="btn btn-success btn-xs">Reinstate</button>
+                <button phx-click="void_game" phx-value-game_id={game.id}
+                        class="btn btn-error btn-xs">Void</button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
 
   attr :tab, :string, required: true
   attr :current, :string, required: true

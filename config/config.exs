@@ -44,7 +44,13 @@ config :hammer,
 # Oban — three named queues per observability spec
 config :zockelo, Oban,
   repo: Zockelo.Repo,
-  plugins: [Oban.Plugins.Pruner],
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"*/15 * * * *", Zockelo.Workers.GameConfirmationWorker}
+     ]}
+  ],
   queues: [
     notifications: 10,
     scheduled: 5,
