@@ -46,12 +46,12 @@
 
 ## 5. Authentication
 
-- [ ] 5.1 Create `magic_link_tokens` Ecto migration (email, token_hash, tenant_id, expires_at, used_at); expires_at set to 15 minutes from issuance
-- [ ] 5.2 Implement magic link generation: create token, hash for storage, send email via Swoosh; use tenant `custom_domain` as base URL when set, otherwise `PHX_HOST`; configure `Swoosh.Adapters.Local` in `config/dev.exs` (Phoenix default) so all emails are captured in memory — developers visit `http://localhost:4000/dev/mailbox` to view sent emails and click magic links without any SMTP setup
-- [ ] 5.3 Implement magic link verification: check hash, expiry, used_at; create session on success
-- [ ] 5.4 Implement session management with signed HTTP-only cookies; enforce idle timeout (default: 8 hours) AND absolute max lifetime (default: 7 days); store session `created_at` to enable absolute expiry check on each request
-- [ ] 5.5 Create `invite_links` Ecto migration (tenant_id, token, expires_at, created_by, revoked_at)
-- [ ] 5.6 Implement invite link generation, validation, and rotation for tenant admins
+- [x] 5.1 Create `magic_link_tokens` Ecto migration (email, token_hash, tenant_id, expires_at, used_at); expires_at set to 15 minutes from issuance
+- [x] 5.2 Implement magic link generation: create token, hash for storage, send email via Swoosh; use tenant `custom_domain` as base URL when set, otherwise `PHX_HOST`; configure `Swoosh.Adapters.Local` in `config/dev.exs` (Phoenix default) so all emails are captured in memory — developers visit `http://localhost:4000/dev/mailbox` to view sent emails and click magic links without any SMTP setup
+- [x] 5.3 Implement magic link verification: check hash, expiry, used_at; create session on success
+- [x] 5.4 Implement session management with signed HTTP-only cookies; enforce idle timeout (default: 8 hours) AND absolute max lifetime (default: 7 days); store session `created_at` to enable absolute expiry check on each request
+- [x] 5.5 Create `invite_links` Ecto migration (tenant_id, token, expires_at, created_by, revoked_at)
+- [x] 5.6 Implement invite link generation, validation, and rotation for tenant admins
 
 ## 6. Authorization
 
