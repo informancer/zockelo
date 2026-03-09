@@ -61,16 +61,16 @@
 
 ## 7. Super Admin and Tenant Management
 
-- [ ] 7.1 Implement `Zockelo.ReleaseTasks.create_super_admin/1` function (idempotency check: no-op with warning if super admin already exists); wrap it in a `mix zockelo.create_super_admin --email <email>` mix task for dev use; both paths use the same underlying function so it is callable via `./bin/zockelo eval` in Docker release context
-- [ ] 7.2 Build super admin LiveView: `/admin` — tenant list, system config, super admin list; when no tenants exist show a prominent "Create your first league" call-to-action above the empty tenant list
-- [ ] 7.3 Build super admin tenant creation form (direct mode): slug, name, first tenant admin by email invite or existing player selection
-- [ ] 7.4 Build tenant request/approval flow (request form + approval queue in super admin panel); send approval/rejection emails to requester
-- [ ] 7.5 Build system config UI in super admin panel: `tenant_creation_mode` toggle; `audit_log_retention_days` integer input (default: 730, minimum: 90)
-- [ ] 7.6 Build tenant detail view in super admin panel: config, player list with roles, activity stats
-- [ ] 7.7 Implement super admin role grant/revoke UI with guard against removing last super admin
-- [ ] 7.8 Implement super admin tenant deletion (unilateral initiation, grace period, notify tenant admins)
-- [ ] 7.9 Add `TenantDeletionRequested`, `TenantDeletionConfirmed`, `TenantDeletionCancelled` events and aggregate handlers
-- [ ] 7.10 Implement `TenantDeletionWorker` Oban job: execute deletion after grace period (bulk crypto-shred all players)
+- [x] 7.1 Implement `Zockelo.ReleaseTasks.create_super_admin/1` function (idempotency check: no-op with warning if super admin already exists); wrap it in a `mix zockelo.create_super_admin --email <email>` mix task for dev use; both paths use the same underlying function so it is callable via `./bin/zockelo eval` in Docker release context
+- [x] 7.2 Build super admin LiveView: `/admin` — tenant list, system config, super admin list; when no tenants exist show a prominent "Create your first league" call-to-action above the empty tenant list
+- [x] 7.3 Build super admin tenant creation form (direct mode): slug, name, first tenant admin by email invite or existing player selection
+- [x] 7.4 Build tenant request/approval flow (request form + approval queue in super admin panel); send approval/rejection emails to requester
+- [x] 7.5 Build system config UI in super admin panel: `tenant_creation_mode` toggle; `audit_log_retention_days` integer input (default: 730, minimum: 90)
+- [x] 7.6 Build tenant detail view in super admin panel: config, player list with roles, activity stats
+- [x] 7.7 Implement super admin role grant/revoke UI with guard against removing last super admin
+- [x] 7.8 Implement super admin tenant deletion (unilateral initiation, grace period, notify tenant admins)
+- [x] 7.9 Add `TenantDeletionRequested`, `TenantDeletionConfirmed`, `TenantDeletionCancelled` events and aggregate handlers
+- [x] 7.10 Implement `TenantDeletionWorker` Oban job: execute deletion after grace period (bulk crypto-shred all players)
 
 ## 8. Tenant Admin Panel
 

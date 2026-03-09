@@ -9,7 +9,10 @@ defmodule Zockelo.Projections.TenantProjectionTest do
     TenantRequested,
     TenantApproved,
     TenantRejected,
-    TenantConfigUpdated
+    TenantConfigUpdated,
+    TenantDeletionRequested,
+    TenantDeletionConfirmed,
+    TenantDeletionCancelled
   }
 
   @tenant_id "00000000-0000-0000-0000-000000000001"
@@ -110,6 +113,54 @@ defmodule Zockelo.Projections.TenantProjectionTest do
       config = Repo.get(TenantRead, @tenant_id).config
       assert config["rounds_to_win"] == 3
       assert config["points_per_round"] == 10
+    end
+  end
+
+  describe "TenantDeletion lifecycle" do
+    setup do
+      :ok = handle(%TenantRegistered.V1{
+        tenant_id: @tenant_id, slug: "acme", name: "Acme FC",
+        registered_at: DateTime.utc_now()
+      })
+      :ok
+    end
+
+    test "TenantDeletionRequested sets status to deletion_pending" do
+      :ok = handle(%TenantDeletionRequested.V1{
+        tenant_id: @tenant_id, requested_by: "admin",
+        grace_period_hours: 48,
+        execute_at: DateTime.add(DateTime.utc_now(), 48 * 3600, :second),
+        requested_at: DateTime.utc_now()
+      })
+      assert Repo.get(TenantRead, @tenant_id).status == "deletion_pending"
+    end
+
+    test "TenantDeletionConfirmed sets status to deleted" do
+      :ok = handle(%TenantDeletionRequested.V1{
+        tenant_id: @tenant_id, requested_by: "admin",
+        grace_period_hours: 48,
+        execute_at: DateTime.add(DateTime.utc_now(), 48 * 3600, :second),
+        requested_at: DateTime.utc_now()
+      })
+      :ok = handle(%TenantDeletionConfirmed.V1{
+        tenant_id: @tenant_id, confirmed_by: "super",
+        confirmed_at: DateTime.utc_now()
+      })
+      assert Repo.get(TenantRead, @tenant_id).status == "deleted"
+    end
+
+    test "TenantDeletionCancelled restores status to active" do
+      :ok = handle(%TenantDeletionRequested.V1{
+        tenant_id: @tenant_id, requested_by: "admin",
+        grace_period_hours: 48,
+        execute_at: DateTime.add(DateTime.utc_now(), 48 * 3600, :second),
+        requested_at: DateTime.utc_now()
+      })
+      :ok = handle(%TenantDeletionCancelled.V1{
+        tenant_id: @tenant_id, cancelled_by: "admin",
+        cancelled_at: DateTime.utc_now()
+      })
+      assert Repo.get(TenantRead, @tenant_id).status == "active"
     end
   end
 end

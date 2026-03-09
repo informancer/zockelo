@@ -13,6 +13,7 @@ defmodule Zockelo.Projections.TenantProjection do
     TenantRejected,
     TenantConfigUpdated,
     TenantDeletionRequested,
+    TenantDeletionConfirmed,
     TenantDeletionCancelled
   }
 
@@ -53,6 +54,11 @@ defmodule Zockelo.Projections.TenantProjection do
   project(%TenantDeletionRequested.V1{tenant_id: id}, _meta, fn multi ->
     Ecto.Multi.update_all(multi, :tenant,
       tenant_query(id), set: [status: "deletion_pending"])
+  end)
+
+  project(%TenantDeletionConfirmed.V1{tenant_id: id}, _meta, fn multi ->
+    Ecto.Multi.update_all(multi, :tenant,
+      tenant_query(id), set: [status: "deleted"])
   end)
 
   project(%TenantDeletionCancelled.V1{tenant_id: id}, _meta, fn multi ->
