@@ -8,6 +8,17 @@ defmodule ZockeloWeb.Router do
     plug :put_root_layout, html: {ZockeloWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug ZockeloWeb.Plugs.LoadSessionPlug
+  end
+
+  # Requires an active session; redirects to login otherwise.
+  pipeline :require_auth do
+    plug ZockeloWeb.Plugs.RequireAuthPlug
+  end
+
+  # Requires the player to be a member of the tenant in the URL slug.
+  pipeline :require_tenant do
+    plug ZockeloWeb.Plugs.RequireTenantPlug
   end
 
   pipeline :api do

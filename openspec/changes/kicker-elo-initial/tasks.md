@@ -55,9 +55,9 @@
 
 ## 6. Authorization
 
-- [ ] 6.1 Define role system: `:super_admin`, `:tenant_admin`, `:player` with per-tenant scope
-- [ ] 6.2 Implement `KickerElo.Authorization.authorize/3` plug/helper for LiveView and controllers
-- [ ] 6.3 Protect all LiveView routes with authentication and role checks
+- [x] 6.1 Define role system: `:super_admin`, `:tenant_admin`, `:player` with per-tenant scope
+- [x] 6.2 Implement `KickerElo.Authorization.authorize/3` plug/helper for LiveView and controllers
+- [x] 6.3 Protect all LiveView routes with authentication and role checks
 
 ## 7. Super Admin and Tenant Management
 
