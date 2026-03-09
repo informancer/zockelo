@@ -87,18 +87,18 @@
 
 ## 9. Game Logging
 
-- [ ] 9.1 Build game logging LiveView: `/:tenant_slug/games/new`
-- [ ] 9.2 Build SVG foosball table component with tappable front/back slots flanking each team side (red and black player figures)
-- [ ] 9.3 Build player card picker overlay: active (non-deleted) player cards with name + rating, search/filter input; grey out and make non-selectable any player already assigned to any slot in the current game (same team or opposing team); when a filled slot is tapped to reassign, unblock the currently assigned player first so they appear selectable again; when the tenant has ≤2 active players auto-fill both team slots on form load (picker still accessible via tap for corrections)
-- [ ] 9.4 Implement per-round position tracking: pre-fill round N+1 slots from round N assignments
-- [ ] 9.5 Implement 1v1 mode: single slot per side, no front/back distinction, no position data in event
-- [ ] 9.6 Implement dynamic round score inputs based on tenant `rounds_to_win` config
-- [ ] 9.7 Implement client-side score validation (block scores exceeding `points_per_round`)
-- [ ] 9.8 Implement server-side validation in `LogGame` command handler: score validation (no score exceeds `points_per_round`), winning condition validation (`rounds_to_win` must be reached), and duplicate player validation (reject if any player_id appears more than once across team1 + team2)
-- [ ] 9.9 Update `GameLogged` event struct to include per-round positions: `{team1_front, team1_back, team2_front, team2_back, team1_score, team2_score}`
-- [ ] 9.10 Update `game_rounds` read model migration to include front/back player_id columns
-- [ ] 9.11 Wire game logging form to dispatch `LogGame` command; add winning condition validation: disable submit until one team has won `rounds_to_win` rounds; show inline message "Keep entering rounds until a team wins" when blocked
-- [ ] 9.12 Implement post-submission feedback: trust mode → flash "Game logged — ratings updated", redirect to dashboard; confirmation mode → flash "Game logged — waiting for confirmation from [player names]", redirect to dashboard where pending game card is visible; store snapshot of `rounds_to_win` and `points_per_round` in `GameLogged` event at logging time
+- [x] 9.1 Build game logging LiveView: `/:tenant_slug/games/new`
+- [x] 9.2 Build SVG foosball table component with tappable front/back slots flanking each team side (red and black player figures)
+- [x] 9.3 Build player card picker overlay: active (non-deleted) player cards with name + rating, search/filter input; grey out and make non-selectable any player already assigned to any slot in the current game (same team or opposing team); when a filled slot is tapped to reassign, unblock the currently assigned player first so they appear selectable again; when the tenant has ≤2 active players auto-fill both team slots on form load (picker still accessible via tap for corrections)
+- [x] 9.4 Implement per-round position tracking: pre-fill round N+1 slots from round N assignments
+- [x] 9.5 Implement 1v1 mode: single slot per side, no front/back distinction, no position data in event
+- [x] 9.6 Implement dynamic round score inputs based on tenant `rounds_to_win` config
+- [x] 9.7 Implement client-side score validation (block scores exceeding `points_per_round`)
+- [x] 9.8 Implement server-side validation in `LogGame` command handler: score validation (no score exceeds `points_per_round`), winning condition validation (`rounds_to_win` must be reached), and duplicate player validation (reject if any player_id appears more than once across team1 + team2)
+- [x] 9.9 Update `GameLogged` event struct to include per-round positions: `{team1_front, team1_back, team2_front, team2_back, team1_score, team2_score}`
+- [x] 9.10 Update `game_rounds` read model migration to include front/back player_id columns
+- [x] 9.11 Wire game logging form to dispatch `LogGame` command; add winning condition validation: disable submit until one team has won `rounds_to_win` rounds; show inline message "Keep entering rounds until a team wins" when blocked
+- [x] 9.12 Implement post-submission feedback: trust mode → flash "Game logged — ratings updated", redirect to dashboard; confirmation mode → flash "Game logged — waiting for confirmation from [player names]", redirect to dashboard where pending game card is visible; store snapshot of `rounds_to_win` and `points_per_round` in `GameLogged` event at logging time
 
 ## 10. Game Confirmation Flow
 

@@ -49,6 +49,14 @@ defmodule ZockeloWeb.Router do
     get "/:tenant_slug/manifest.json", ManifestController, :show
   end
 
+  # Tenant pages — /:tenant_slug/*
+  scope "/:tenant_slug", ZockeloWeb.Tenant do
+    pipe_through [:browser, :require_auth, :require_tenant]
+
+    live "/games", GamesLive
+    live "/games/new", GameNewLive
+  end
+
   # Tenant admin panel — /:tenant_slug/admin
   scope "/:tenant_slug", ZockeloWeb.TenantAdmin do
     pipe_through [:browser, :require_auth, :require_tenant, :require_tenant_admin]
