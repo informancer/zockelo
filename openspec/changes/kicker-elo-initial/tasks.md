@@ -37,12 +37,12 @@
 
 ## 4. Read Models and Projections
 
-- [ ] 4.1 Create Ecto migrations for read models: `player_ratings`, `games`, `game_rounds`, `player_profiles`, `tenants`; include all required indexes in the same migrations: (tenant_id, rating DESC) on player_ratings; (tenant_id, logged_at DESC) and (tenant_id, game_id) on games; position column indexes on game_rounds; token_hash unique indexes on sessions and magic_link_tokens; all other indexes per performance spec
-- [ ] 4.2 Implement `PlayerRatingsProjection`: handle `PlayerActivated` (insert with rating=1000), `GameConfirmed`/`GameLogged` (update ratings), `PlayerDeleted` (mark deleted)
-- [ ] 4.3 Implement Elo calculation in projection: team avg, expected score, per-player K-factor decay, delta application; apply rating floor of 100 (clamp result if below)
-- [ ] 4.4 Implement `GameHistoryProjection`: handle all game events, track status transitions (pending/confirmed/disputed/voided)
-- [ ] 4.5 Implement `TenantProjection`: handle tenant events, store config
-- [ ] 4.6 Add per-round rating delta tracking to `game_rounds` for player profile history
+- [x] 4.1 Create Ecto migrations for read models: `player_ratings`, `games`, `game_rounds`, `player_profiles`, `tenants`; include all required indexes in the same migrations: (tenant_id, rating DESC) on player_ratings; (tenant_id, logged_at DESC) and (tenant_id, game_id) on games; position column indexes on game_rounds; token_hash unique indexes on sessions and magic_link_tokens; all other indexes per performance spec
+- [x] 4.2 Implement `PlayerRatingsProjection`: handle `PlayerActivated` (insert with rating=1000), `GameConfirmed`/`GameLogged` (update ratings), `PlayerDeleted` (mark deleted)
+- [x] 4.3 Implement Elo calculation in projection: team avg, expected score, per-player K-factor decay, delta application; apply rating floor of 100 (clamp result if below)
+- [x] 4.4 Implement `GameHistoryProjection`: handle all game events, track status transitions (pending/confirmed/disputed/voided)
+- [x] 4.5 Implement `TenantProjection`: handle tenant events, store config
+- [x] 4.6 Add per-round rating delta tracking to `game_rounds` for player profile history
 
 ## 5. Authentication
 

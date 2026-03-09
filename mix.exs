@@ -70,6 +70,7 @@ defmodule Zockelo.MixProject do
       # Event sourcing
       {:commanded, "~> 1.4"},
       {:commanded_eventstore_adapter, "~> 1.4"},
+      {:commanded_ecto_projections, "~> 1.4"},
       {:eventstore, "~> 1.4"},
       # Encryption / crypto-shredding
       {:cloak, "~> 1.1"},
