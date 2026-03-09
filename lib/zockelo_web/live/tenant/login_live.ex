@@ -2,7 +2,7 @@ defmodule ZockeloWeb.Tenant.LoginLive do
   @moduledoc "Magic link login request: /:tenant_slug/login"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Auth, Players, Tenants}
+  alias Zockelo.{Auth, Players, Tenants, RateLimiter}
 
   @impl true
   def mount(%{"tenant_slug" => slug}, _session, socket) do
@@ -16,25 +16,32 @@ defmodule ZockeloWeb.Tenant.LoginLive do
        |> assign(:tenant, tenant)
        |> assign(:page_title, "Sign in — #{app_name(tenant)}")
        |> assign(:submitted, false)
-       |> assign(:error, nil)}
+       |> assign(:error, nil)
+       |> assign(:peer_ip, RateLimiter.peer_ip(socket))}
     end
   end
 
   @impl true
   def handle_event("login", %{"email" => email}, socket) when byte_size(email) > 0 do
-    tenant = socket.assigns.tenant
+    ip = socket.assigns.peer_ip
+    identifier = "#{email}:#{ip}"
 
-    # Look up player — silently do nothing if not found (no email enumeration)
-    case Players.find_player_by_email(tenant.id, email) do
-      {:ok, player_id} ->
-        Auth.generate_magic_link(email, tenant.id, player_id)
+    case RateLimiter.check(:magic_link, identifier) do
+      {:error, :rate_limited} ->
+        {:noreply, assign(socket, :submitted, true)}
 
-      {:error, :not_found} ->
-        :ok
+      :ok ->
+        tenant = socket.assigns.tenant
+
+        # Look up player — silently do nothing if not found (no email enumeration)
+        case Players.find_player_by_email(tenant.id, email) do
+          {:ok, player_id} -> Auth.generate_magic_link(email, tenant.id, player_id)
+          {:error, :not_found} -> :ok
+        end
+
+        # Always show "check your email" regardless of outcome
+        {:noreply, assign(socket, :submitted, true)}
     end
-
-    # Always show "check your email" regardless of outcome
-    {:noreply, assign(socket, :submitted, true)}
   end
 
   def handle_event("login", _params, socket) do

@@ -20,6 +20,19 @@ if System.get_env("PHX_SERVER") do
   config :zockelo, ZockeloWeb.Endpoint, server: true
 end
 
+# Trust reverse-proxy headers (X-Forwarded-For etc.) only when explicitly enabled.
+# Must be set when running behind Caddy or any reverse proxy.
+# Must NOT be set when the app is exposed directly to the internet.
+if System.get_env("TRUST_PROXY_HEADERS") == "true" do
+  config :zockelo, ZockeloWeb.Endpoint,
+    http: [
+      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      protocol_options: [proxy_header: :on]
+    ]
+
+  config :zockelo, :rewrite_on, [:x_forwarded_for, :x_forwarded_proto]
+end
+
 config :zockelo, ZockeloWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 

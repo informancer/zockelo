@@ -8,12 +8,14 @@ defmodule ZockeloWeb.Endpoint do
     store: :cookie,
     key: "_zockelo_key",
     signing_salt: "ImGm6onn",
-    same_site: "Lax"
+    same_site: "Lax",
+    http_only: true,
+    secure: Application.compile_env(:zockelo, :secure_cookies, false)
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
-    websocket: [connect_info: [session: @session_options]],
-    longpoll: [connect_info: [session: @session_options]]
+    websocket: [connect_info: [:peer_data, session: @session_options]],
+    longpoll: [connect_info: [:peer_data, session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -39,6 +41,9 @@ defmodule ZockeloWeb.Endpoint do
   plug Phoenix.LiveDashboard.RequestLogger,
     param_key: "request_logger",
     cookie_key: "request_logger"
+
+  # Trust reverse-proxy headers only when TRUST_PROXY_HEADERS=true (checked at runtime).
+  plug ZockeloWeb.Plugs.ConditionalRewritePlug
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]

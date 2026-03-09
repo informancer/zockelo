@@ -8,14 +8,19 @@ defmodule ZockeloWeb.AuthController do
   Verifies a magic link token, creates a session, and redirects to the
   appropriate destination based on the player's activation state.
   """
-  def magic(conn, %{"token" => token}) do
+  def magic(conn, %{"token" => token} = params) do
+    return_to = safe_return_to(params["return_to"])
+
     with {:ok, player_id} <- Auth.verify_magic_link(token),
          profile when not is_nil(profile) <- Players.get_player(player_id),
          tenant when not is_nil(tenant) <- Tenants.get_tenant(profile.tenant_id),
          {:ok, session} <- Auth.create_session(player_id, profile.tenant_id) do
+      destination = return_to || post_login_path(profile, tenant)
+
       conn
+      |> configure_session(renew: true)
       |> put_session("session_id", session.id)
-      |> redirect(to: post_login_path(profile, tenant))
+      |> redirect(to: destination)
     else
       {:error, :already_used} ->
         conn
@@ -76,4 +81,18 @@ defmodule ZockeloWeb.AuthController do
 
   # Active, regular player → dashboard
   defp post_login_path(_profile, tenant), do: "/#{tenant.slug}/"
+
+  # Accepts only relative paths that start with "/" and contain no "://" or leading "//".
+  defp safe_return_to(nil), do: nil
+  defp safe_return_to(""), do: nil
+
+  defp safe_return_to(path) do
+    if String.starts_with?(path, "/") and
+         not String.starts_with?(path, "//") and
+         not String.contains?(path, "://") do
+      path
+    else
+      nil
+    end
+  end
 end

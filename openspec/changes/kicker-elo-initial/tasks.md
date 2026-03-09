@@ -163,25 +163,25 @@
 
 ## 15. Security
 
-- [ ] 15.1 Add `hammer` dependency; implement rate limiting plug for magic link requests (per email + per IP), invite registrations, token verification
-- [ ] 15.2 Implement tenant isolation plug: apply only to protected routes (all `/:tenant_slug/*` except `/login`, `/join`, `/imprint`, `/privacy`); validate that the authenticated player is a member of the tenant identified by the slug, or is a super admin; return 404 for non-members; public routes bypass the plug entirely and are accessible to any visitor regardless of authentication state
-- [ ] 15.3 Enforce tenant-scoped queries: audit all Ecto queries for domain resources to ensure `tenant_id` filter is always present
-- [ ] 15.4 Implement security headers plug: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; configure CSP with `put_secure_browser_headers/2` nonce + `connect-src wss://{effective_host}` (tenant custom_domain or PHX_HOST, resolved per request) + `img-src 'self' data:`; apply nonce to LiveView client script tag and all JS hook `<script>` tags
-- [ ] 15.11 Gate `Plug.RewriteOn` behind `TRUST_PROXY_HEADERS=true` env var: only add the plug to the endpoint pipeline when `System.get_env("TRUST_PROXY_HEADERS") == "true"`; document in `.env.example` that this must be set when running behind Caddy or any reverse proxy, and must NOT be set when the application is exposed directly; add a startup warning log when the app is in production and `TRUST_PROXY_HEADERS` is not set
-- [ ] 15.5 Harden session config: regenerate session ID on login, set HttpOnly + Secure + SameSite=Lax, configure idle timeout (default 8h)
-- [ ] 15.6 Enforce cryptographic token generation: use `:crypto.strong_rand_bytes(32)` for all tokens; store SHA-256 hash only
-- [ ] 15.7 Create `admin_audit_log` Ecto migration (actor_id, actor_role, tenant_id, action, target_id, target_type, performed_at)
-- [ ] 15.8 Instrument all security-sensitive admin actions to write to `admin_audit_log`: player deletion, role changes, tenant deletion, config changes, invite rotation, data export; render unresolvable `actor_id` as `[Deleted Admin]` in all audit log views; do NOT delete audit log entries during player deletion — retention is intentional
-- [ ] 15.9 Configure logger to filter PII, tokens, and keys from all log output
-- [ ] 15.10 Configure HTTPS redirect and enforce Secure cookie flag in production environment config
-- [ ] 15.12 Verify `Plug.CSRFProtection` is included in the browser pipeline via `protect_from_forgery`; add explicit test that POST without CSRF token returns 403; exempt `POST /unsubscribe` from CSRF (it is protected by HMAC parameter)
-- [ ] 15.13 Add `priv/static/robots.txt` with `User-agent: *` / `Disallow: /`; serve it from the endpoint's static file plug
-- [ ] 15.14 Implement live role resolution: authentication plug reads `player_id` from session, fetches current role from DB on every request; session stores only `player_id` — no role, no tenant membership
-- [ ] 15.15 Replace all token hash comparisons with `:crypto.hash_equals/2` (magic link verification, session token lookup, invite token validation, unsubscribe HMAC check)
-- [ ] 15.16 Audit every Ecto changeset that processes user input: ensure `cast/3` field lists never include `role`, `tenant_id`, `player_id`, `inserted_at`, `updated_at`, or any other privileged field; add a code-review checklist item for new changesets
-- [ ] 15.17 Add changeset validation rejecting CRLF characters in all email address and display name fields; apply to player profile update, invite submission, and tenant admin email fields
-- [ ] 15.18 Ensure Phoenix dev routes (`/dev/dashboard`, `/dev/mailbox`) are gated with `if Mix.env() == :dev` in the router; verify they return 404 in the test environment as a proxy for production
-- [ ] 15.19 Implement `return_to` validation in the magic link verification handler: accept only relative paths (starts with `/`, no `://`, no `//`); fall back to `/:tenant_slug/` for any invalid value
+- [x] 15.1 Add `hammer` dependency; implement rate limiting plug for magic link requests (per email + per IP), invite registrations, token verification
+- [x] 15.2 Implement tenant isolation plug: apply only to protected routes (all `/:tenant_slug/*` except `/login`, `/join`, `/imprint`, `/privacy`); validate that the authenticated player is a member of the tenant identified by the slug, or is a super admin; return 404 for non-members; public routes bypass the plug entirely and are accessible to any visitor regardless of authentication state
+- [x] 15.3 Enforce tenant-scoped queries: audit all Ecto queries for domain resources to ensure `tenant_id` filter is always present
+- [x] 15.4 Implement security headers plug: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; configure CSP with `put_secure_browser_headers/2` nonce + `connect-src wss://{effective_host}` (tenant custom_domain or PHX_HOST, resolved per request) + `img-src 'self' data:`; apply nonce to LiveView client script tag and all JS hook `<script>` tags
+- [x] 15.11 Gate `Plug.RewriteOn` behind `TRUST_PROXY_HEADERS=true` env var: only add the plug to the endpoint pipeline when `System.get_env("TRUST_PROXY_HEADERS") == "true"`; document in `.env.example` that this must be set when running behind Caddy or any reverse proxy, and must NOT be set when the application is exposed directly; add a startup warning log when the app is in production and `TRUST_PROXY_HEADERS` is not set
+- [x] 15.5 Harden session config: regenerate session ID on login, set HttpOnly + Secure + SameSite=Lax, configure idle timeout (default 8h)
+- [x] 15.6 Enforce cryptographic token generation: use `:crypto.strong_rand_bytes(32)` for all tokens; store SHA-256 hash only
+- [x] 15.7 Create `admin_audit_log` Ecto migration (actor_id, actor_role, tenant_id, action, target_id, target_type, performed_at)
+- [x] 15.8 Instrument all security-sensitive admin actions to write to `admin_audit_log`: player deletion, role changes, tenant deletion, config changes, invite rotation, data export; render unresolvable `actor_id` as `[Deleted Admin]` in all audit log views; do NOT delete audit log entries during player deletion — retention is intentional
+- [x] 15.9 Configure logger to filter PII, tokens, and keys from all log output
+- [x] 15.10 Configure HTTPS redirect and enforce Secure cookie flag in production environment config
+- [x] 15.12 Verify `Plug.CSRFProtection` is included in the browser pipeline via `protect_from_forgery`; add explicit test that POST without CSRF token returns 403; exempt `POST /unsubscribe` from CSRF (it is protected by HMAC parameter)
+- [x] 15.13 Add `priv/static/robots.txt` with `User-agent: *` / `Disallow: /`; serve it from the endpoint's static file plug
+- [x] 15.14 Implement live role resolution: authentication plug reads `player_id` from session, fetches current role from DB on every request; session stores only `player_id` — no role, no tenant membership
+- [x] 15.15 Replace all token hash comparisons with `:crypto.hash_equals/2` (magic link verification, session token lookup, invite token validation, unsubscribe HMAC check)
+- [x] 15.16 Audit every Ecto changeset that processes user input: ensure `cast/3` field lists never include `role`, `tenant_id`, `player_id`, `inserted_at`, `updated_at`, or any other privileged field; add a code-review checklist item for new changesets
+- [x] 15.17 Add changeset validation rejecting CRLF characters in all email address and display name fields; apply to player profile update, invite submission, and tenant admin email fields
+- [x] 15.18 Ensure Phoenix dev routes (`/dev/dashboard`, `/dev/mailbox`) are gated with `if Mix.env() == :dev` in the router; verify they return 404 in the test environment as a proxy for production
+- [x] 15.19 Implement `return_to` validation in the magic link verification handler: accept only relative paths (starts with `/`, no `://`, no `//`); fall back to `/:tenant_slug/` for any invalid value
 
 ## 16. Internationalisation
 

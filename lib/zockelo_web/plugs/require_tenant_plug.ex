@@ -9,6 +9,7 @@ defmodule ZockeloWeb.Plugs.RequireTenantPlug do
   import Ecto.Query
 
   alias Zockelo.Repo
+  alias Zockelo.SuperAdmins
   alias Zockelo.Projections.{TenantRead, PlayerProfile}
 
   def init(opts), do: opts
@@ -18,7 +19,7 @@ defmodule ZockeloWeb.Plugs.RequireTenantPlug do
     session = conn.assigns[:current_session]
 
     with {:ok, tenant} <- fetch_tenant(tenant_slug),
-         {:ok, profile} <- fetch_profile(session.player_id, tenant.id) do
+         {:ok, profile} <- fetch_profile_or_super_admin(session.player_id, tenant) do
       conn
       |> assign(:current_tenant, tenant)
       |> assign(:current_user, profile)
@@ -33,6 +34,21 @@ defmodule ZockeloWeb.Plugs.RequireTenantPlug do
     case Repo.get_by(TenantRead, slug: slug) do
       nil -> {:error, :not_found}
       tenant -> {:ok, tenant}
+    end
+  end
+
+  defp fetch_profile_or_super_admin(player_id, tenant) do
+    case fetch_profile(player_id, tenant.id) do
+      {:ok, profile} ->
+        {:ok, profile}
+
+      {:error, :not_member} ->
+        if SuperAdmins.super_admin?(player_id) do
+          # Super admins get a synthetic profile for tenant-scoped views.
+          {:ok, %PlayerProfile{player_id: player_id, tenant_id: tenant.id, role: "super_admin"}}
+        else
+          {:error, :not_member}
+        end
     end
   end
 

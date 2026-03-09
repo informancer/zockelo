@@ -111,6 +111,12 @@ config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Filter PII, tokens, and keys from request parameter logs.
+config :phoenix, :filter_parameters, [
+  "token", "password", "secret", "email", "encrypted_email", "encrypted_name",
+  "token_hash", "cloak_key", "signing_salt", "secret_key_base"
+]
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

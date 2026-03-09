@@ -2,7 +2,7 @@ defmodule ZockeloWeb.Tenant.JoinLive do
   @moduledoc "Self-registration via invite link: /:tenant_slug/join?code={token}"
   use ZockeloWeb, :live_view
 
-  alias Zockelo.{Auth, Players, Tenants}
+  alias Zockelo.{Auth, Players, Tenants, RateLimiter}
 
   @impl true
   def mount(%{"tenant_slug" => slug} = params, _session, socket) do
@@ -21,30 +21,37 @@ defmodule ZockeloWeb.Tenant.JoinLive do
        |> assign(:invite_valid, invite_valid)
        |> assign(:page_title, "Join #{app_name(tenant)}")
        |> assign(:submitted, false)
-       |> assign(:error, nil)}
+       |> assign(:error, nil)
+       |> assign(:peer_ip, RateLimiter.peer_ip(socket))}
     end
   end
 
   @impl true
   def handle_event("register", %{"email" => email, "name" => name}, socket)
       when byte_size(email) > 0 and byte_size(name) > 0 do
-    tenant = socket.assigns.tenant
+    case RateLimiter.check(:join, socket.assigns.peer_ip) do
+      {:error, :rate_limited} ->
+        {:noreply, assign(socket, :error, "Too many attempts. Please wait and try again.")}
 
-    case Auth.validate_invite_link(socket.assigns.code, tenant.id) do
-      {:ok, _tenant_id} ->
-        case Players.invite_player(tenant.id, email, "invite_link") do
-          {:ok, _player_id} ->
-            {:noreply, assign(socket, :submitted, true)}
+      :ok ->
+        tenant = socket.assigns.tenant
 
-          {:error, reason} ->
-            {:noreply, assign(socket, :error, "Registration failed: #{inspect(reason)}")}
+        case Auth.validate_invite_link(socket.assigns.code, tenant.id) do
+          {:ok, _tenant_id} ->
+            case Players.invite_player(tenant.id, email, "invite_link") do
+              {:ok, _player_id} ->
+                {:noreply, assign(socket, :submitted, true)}
+
+              {:error, reason} ->
+                {:noreply, assign(socket, :error, "Registration failed: #{inspect(reason)}")}
+            end
+
+          {:error, _} ->
+            {:noreply,
+             socket
+             |> assign(:invite_valid, false)
+             |> assign(:error, "This invite link is no longer valid.")}
         end
-
-      {:error, _} ->
-        {:noreply,
-         socket
-         |> assign(:invite_valid, false)
-         |> assign(:error, "This invite link is no longer valid.")}
     end
   end
 

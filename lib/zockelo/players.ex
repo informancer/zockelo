@@ -12,6 +12,7 @@ defmodule Zockelo.Players do
   alias Zockelo.Crypto
   alias Zockelo.Crypto.PlayerDeletion
   alias Zockelo.Auth
+  alias Zockelo.Audit
   alias Zockelo.Notifications
   alias Zockelo.Projections.{PlayerProfile, TenantRead}
 
@@ -24,6 +25,12 @@ defmodule Zockelo.Players do
     ChangePlayerEmail
   }
 
+  @crlf_re ~r/[\r\n]/
+
+  defp validate_no_crlf(value) when is_binary(value) do
+    if Regex.match?(@crlf_re, value), do: {:error, :crlf_injection}, else: :ok
+  end
+
   # ---------------------------------------------------------------------------
   # Invite
   # ---------------------------------------------------------------------------
@@ -35,6 +42,12 @@ defmodule Zockelo.Players do
   and sends a magic link email. Returns `{:ok, player_id}`.
   """
   def invite_player(tenant_id, email, invited_by, role \\ "player") do
+    with :ok <- validate_no_crlf(email) do
+      do_invite_player(tenant_id, email, invited_by, role)
+    end
+  end
+
+  defp do_invite_player(tenant_id, email, invited_by, role) do
     player_id = Ecto.UUID.generate()
 
     {:ok, _raw_key} = Crypto.generate_player_key(player_id, tenant_id)
@@ -107,6 +120,16 @@ defmodule Zockelo.Players do
       set: [status: "deleted"]
     )
 
+    actor = get_player(deleted_by)
+    Audit.log(
+      actor_id: deleted_by,
+      actor_role: (actor && actor.role) || "unknown",
+      tenant_id: tenant_id,
+      action: :delete_player,
+      target_id: player_id,
+      target_type: "player"
+    )
+
     :ok
   end
 
@@ -166,7 +189,8 @@ defmodule Zockelo.Players do
   `ActivatePlayer`, and updates `player_profiles` for sync read consistency.
   """
   def activate_player(player_id, tenant_id, name) do
-    with {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
+    with :ok <- validate_no_crlf(name),
+         {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
       encrypted_name_b64 = Base.encode64(encrypted_name_bin)
 
       :ok = CommandedApp.dispatch(%ActivatePlayer{
@@ -227,7 +251,8 @@ defmodule Zockelo.Players do
   and directly updates `player_profiles` for sync read consistency.
   """
   def update_player_name(player_id, tenant_id, name) do
-    with {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
+    with :ok <- validate_no_crlf(name),
+         {:ok, encrypted_name_bin} <- Crypto.encrypt_field(player_id, name) do
       encrypted_name_b64 = Base.encode64(encrypted_name_bin)
 
       :ok = CommandedApp.dispatch(%UpdatePlayerName{
@@ -251,7 +276,8 @@ defmodule Zockelo.Players do
   On confirmation, call `confirm_email_change/2`.
   """
   def initiate_email_change(player_id, tenant_id, new_email) do
-    with {:ok, encrypted_email_bin} <- Crypto.encrypt_field(player_id, new_email) do
+    with :ok <- validate_no_crlf(new_email),
+         {:ok, encrypted_email_bin} <- Crypto.encrypt_field(player_id, new_email) do
       Auth.generate_email_change_link(player_id, tenant_id, new_email, encrypted_email_bin)
     end
   end
@@ -282,27 +308,27 @@ defmodule Zockelo.Players do
   # ---------------------------------------------------------------------------
 
   @doc "Grants tenant_admin role to a player (updates PlayerProfile directly)."
-  def grant_admin(player_id, tenant_id) do
-    set_role(player_id, tenant_id, "tenant_admin")
+  def grant_admin(player_id, tenant_id, actor_id \\ nil) do
+    set_role(player_id, tenant_id, "tenant_admin", actor_id)
   end
 
   @doc "Revokes tenant_admin role, setting it back to 'player'."
-  def revoke_admin(player_id, tenant_id) do
-    set_role(player_id, tenant_id, "player")
+  def revoke_admin(player_id, tenant_id, actor_id \\ nil) do
+    set_role(player_id, tenant_id, "player", actor_id)
   end
 
-  defp set_role(player_id, tenant_id, "tenant_admin" = role) do
-    with :ok <- do_set_role(player_id, tenant_id, role) do
+  defp set_role(player_id, tenant_id, "tenant_admin" = role, actor_id) do
+    with :ok <- do_set_role(player_id, tenant_id, role, actor_id) do
       Notifications.seed_admin_defaults(player_id, tenant_id)
       :ok
     end
   end
 
-  defp set_role(player_id, tenant_id, role) do
-    do_set_role(player_id, tenant_id, role)
+  defp set_role(player_id, tenant_id, role, actor_id) do
+    do_set_role(player_id, tenant_id, role, actor_id)
   end
 
-  defp do_set_role(player_id, tenant_id, role) do
+  defp do_set_role(player_id, tenant_id, role, actor_id) do
     case Repo.get_by(PlayerProfile, player_id: player_id, tenant_id: tenant_id) do
       nil ->
         {:error, :not_found}
@@ -312,8 +338,21 @@ defmodule Zockelo.Players do
         |> PlayerProfile.changeset(%{role: role})
         |> Repo.update()
         |> case do
-          {:ok, _} -> :ok
-          {:error, _} = err -> err
+          {:ok, _} ->
+            actor = if actor_id, do: get_player(actor_id)
+            Audit.log(
+              actor_id: actor_id || player_id,
+              actor_role: (actor && actor.role) || "unknown",
+              tenant_id: tenant_id,
+              action: :set_player_role,
+              target_id: player_id,
+              target_type: "player",
+              metadata: %{role: role}
+            )
+            :ok
+
+          {:error, _} = err ->
+            err
         end
     end
   end

@@ -8,6 +8,7 @@ defmodule ZockeloWeb.Router do
     plug :put_root_layout, html: {ZockeloWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug ZockeloWeb.Plugs.SecurityHeadersPlug
     plug ZockeloWeb.Plugs.LoadSessionPlug
   end
 
@@ -41,6 +42,11 @@ defmodule ZockeloWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Rate limiting for token verification (magic link click).
+  pipeline :rate_limit_token do
+    plug ZockeloWeb.Plugs.RateLimitPlug, action: :token_verify
+  end
+
   # PWA service worker — must be served from root scope for max-scope registration.
   scope "/", ZockeloWeb do
     pipe_through :api
@@ -60,14 +66,18 @@ defmodule ZockeloWeb.Router do
     get "/manifest.json", ManifestController, :show
     get "/:tenant_slug/manifest.json", ManifestController, :show
 
-    # Magic link verification — writes session, redirects to destination
-    get "/auth/magic", AuthController, :magic
-
     # Logout
     get "/auth/logout", AuthController, :logout
 
     # Email change confirmation — accessible while optionally authenticated
     live "/auth/email-change", EmailChangeLive
+  end
+
+  # Magic link verification — rate-limited per IP.
+  scope "/", ZockeloWeb do
+    pipe_through [:browser, :rate_limit_token]
+    get "/auth/magic", AuthController, :magic
+    get "/auth/logout", AuthController, :logout
   end
 
   # Tenant public pages — no auth required

@@ -19,6 +19,9 @@ config :zockelo, ZockeloWeb.Endpoint,
     ]
   ]
 
+# Enforce Secure cookie flag in production.
+config :zockelo, :secure_cookies, true
+
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
 
