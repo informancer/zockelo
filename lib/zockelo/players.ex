@@ -12,6 +12,7 @@ defmodule Zockelo.Players do
   alias Zockelo.Crypto
   alias Zockelo.Crypto.PlayerDeletion
   alias Zockelo.Auth
+  alias Zockelo.Notifications
   alias Zockelo.Projections.{PlayerProfile, TenantRead}
 
   alias Zockelo.Domain.Commands.{
@@ -179,6 +180,8 @@ defmodule Zockelo.Players do
         set: [status: "active", encrypted_name: encrypted_name_bin]
       )
 
+      Notifications.seed_player_defaults(player_id, tenant_id)
+
       :ok
     end
   end
@@ -288,7 +291,18 @@ defmodule Zockelo.Players do
     set_role(player_id, tenant_id, "player")
   end
 
+  defp set_role(player_id, tenant_id, "tenant_admin" = role) do
+    with :ok <- do_set_role(player_id, tenant_id, role) do
+      Notifications.seed_admin_defaults(player_id, tenant_id)
+      :ok
+    end
+  end
+
   defp set_role(player_id, tenant_id, role) do
+    do_set_role(player_id, tenant_id, role)
+  end
+
+  defp do_set_role(player_id, tenant_id, role) do
     case Repo.get_by(PlayerProfile, player_id: player_id, tenant_id: tenant_id) do
       nil ->
         {:error, :not_found}

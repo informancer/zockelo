@@ -147,19 +147,19 @@
 
 ## 14. Notifications
 
-- [ ] 14.1 Create `player_notification_preferences` Ecto migration (player_id, notification_type, enabled)
-- [ ] 14.2 Seed default preferences on `PlayerActivated` (all configurable notifications enabled by default)
-- [ ] 14.3 Build notification preferences UI in profile settings (toggles for each type, inactivity warning greyed out)
-- [ ] 14.4 Show admin notification section in preferences only for tenant admins; default admin notifications to enabled on role grant
-- [ ] 14.5 Implement email delivery helpers: check player preference before sending any configurable notification; set `From: {app_name} <SMTP_FROM>` for tenant-scoped emails and `Reply-To:` first tenant admin email; omit `Reply-To` for system emails (magic links, inactivity warnings); add `List-Unsubscribe` and `List-Unsubscribe-Post` headers to all configurable notification emails using HMAC token encoding `player_id:tenant_id:notification_type`
-- [ ] 14.6 Write email templates: game logged, game confirmed, game disputed, game auto-confirmed; use `app_name` in subject lines and email headers
-- [ ] 14.7 Write two distinct invitation email templates: (a) tenant admin invitation — subject "You've been invited to manage [league Name]", body explains admin access; (b) player invitation — subject "You've been invited to [league Name]"; both include league name and a single "Accept invitation" CTA linking to the magic link
-- [ ] 14.7 Write email templates: game disputed (admin), new player via invite link, invite expired, tenant deletion requested, system maintenance announcement; use `app_name` in subject lines and email headers
-- [ ] 14.8 Wire game events to notification dispatch (respect per-player preferences)
-- [ ] 14.9 Implement `POST /unsubscribe` endpoint (no auth, exempt from CSRF): verify HMAC-SHA256 token encoding `player_id:tenant_id:notification_type` signed with `SECRET_KEY_BASE`; on valid token disable that notification preference for the player; return 200; include `List-Unsubscribe` and `List-Unsubscribe-Post` headers on all outgoing notification emails
-- [ ] 14.10 Configure Oban unique jobs for all notification workers: unique key on `{worker, player_id, notification_type, trigger_id}` with a uniqueness window long enough to cover typical retry windows (e.g. 1 hour); prevents duplicate emails on job retry
-- [ ] 14.11 Audit all HTML email templates: remove any `<img>`, `<link>`, or `<script>` tags referencing external URLs; inline any images as base64 data URIs or remove them; add a linting note in the contributing guide prohibiting external references in email templates
-- [ ] 14.12 Ensure all emails are sent as multipart/alternative: every `Swoosh.Email` struct includes both `html_body` and `text_body`; write a plain-text version for each email template
+- [x] 14.1 Create `player_notification_preferences` Ecto migration (player_id, notification_type, enabled)
+- [x] 14.2 Seed default preferences on `PlayerActivated` (all configurable notifications enabled by default)
+- [x] 14.3 Build notification preferences UI in profile settings (toggles for each type, inactivity warning greyed out)
+- [x] 14.4 Show admin notification section in preferences only for tenant admins; default admin notifications to enabled on role grant
+- [x] 14.5 Implement email delivery helpers: check player preference before sending any configurable notification; set `From: {app_name} <SMTP_FROM>` for tenant-scoped emails and `Reply-To:` first tenant admin email; omit `Reply-To` for system emails (magic links, inactivity warnings); add `List-Unsubscribe` and `List-Unsubscribe-Post` headers to all configurable notification emails using HMAC token encoding `player_id:tenant_id:notification_type`
+- [x] 14.6 Write email templates: game logged, game confirmed, game disputed, game auto-confirmed; use `app_name` in subject lines and email headers
+- [x] 14.7 Write two distinct invitation email templates: (a) tenant admin invitation — subject "You've been invited to manage [league Name]", body explains admin access; (b) player invitation — subject "You've been invited to [league Name]"; both include league name and a single "Accept invitation" CTA linking to the magic link
+- [x] 14.7 Write email templates: game disputed (admin), new player via invite link, invite expired, tenant deletion requested, system maintenance announcement; use `app_name` in subject lines and email headers
+- [x] 14.8 Wire game events to notification dispatch (respect per-player preferences)
+- [x] 14.9 Implement `POST /unsubscribe` endpoint (no auth, exempt from CSRF): verify HMAC-SHA256 token encoding `player_id:tenant_id:notification_type` signed with `SECRET_KEY_BASE`; on valid token disable that notification preference for the player; return 200; include `List-Unsubscribe` and `List-Unsubscribe-Post` headers on all outgoing notification emails
+- [x] 14.10 Configure Oban unique jobs for all notification workers: unique key on `{worker, player_id, notification_type, trigger_id}` with a uniqueness window long enough to cover typical retry windows (e.g. 1 hour); prevents duplicate emails on job retry
+- [x] 14.11 Audit all HTML email templates: remove any `<img>`, `<link>`, or `<script>` tags referencing external URLs; inline any images as base64 data URIs or remove them; add a linting note in the contributing guide prohibiting external references in email templates
+- [x] 14.12 Ensure all emails are sent as multipart/alternative: every `Swoosh.Email` struct includes both `html_body` and `text_body`; write a plain-text version for each email template
 
 ## 15. Security
 

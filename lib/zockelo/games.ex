@@ -8,6 +8,7 @@ defmodule Zockelo.Games do
   alias Zockelo.Repo
   alias Zockelo.CommandedApp
   alias Zockelo.Projections.{GameRead, GameRound, PlayerProfile, PlayerRating}
+  alias Zockelo.Workers.GameNotificationWorker
 
   alias Zockelo.Domain.Commands.{
     LogGame,
@@ -72,6 +73,9 @@ defmodule Zockelo.Games do
           conflict_target: :id
         )
 
+        enqueue_game_notification("game_logged", game_id, attrs.tenant_id,
+          attrs.team1_players ++ attrs.team2_players)
+
         {:ok, game_id}
 
       {:error, reason} ->
@@ -85,14 +89,19 @@ defmodule Zockelo.Games do
 
   @doc "Confirms a pending game. Returns :ok or {:error, reason}."
   def confirm_game(game_id, confirmed_by) do
-    with %GameRead{tenant_id: tid, status: "pending"} <- Repo.get(GameRead, game_id) do
+    with %GameRead{tenant_id: tid, team1_players: t1, team2_players: t2, status: "pending"} <-
+           Repo.get(GameRead, game_id) do
       case CommandedApp.dispatch(%ConfirmGame{
              game_id: game_id,
              tenant_id: tid,
              confirmed_by: confirmed_by
            }) do
-        :ok -> :ok
-        err -> err
+        :ok ->
+          enqueue_game_notification("game_confirmed", game_id, tid, (t1 || []) ++ (t2 || []))
+          :ok
+
+        err ->
+          err
       end
     else
       nil -> {:error, :not_found}
@@ -102,15 +111,20 @@ defmodule Zockelo.Games do
 
   @doc "Disputes a pending game. Returns :ok or {:error, reason}."
   def dispute_game(game_id, disputed_by, reason \\ nil) do
-    with %GameRead{tenant_id: tid, status: "pending"} <- Repo.get(GameRead, game_id) do
+    with %GameRead{tenant_id: tid, team1_players: t1, team2_players: t2, status: "pending"} <-
+           Repo.get(GameRead, game_id) do
       case CommandedApp.dispatch(%DisputeGame{
              game_id: game_id,
              tenant_id: tid,
              disputed_by: disputed_by,
              reason: reason
            }) do
-        :ok -> :ok
-        err -> err
+        :ok ->
+          enqueue_game_notification("game_disputed", game_id, tid, (t1 || []) ++ (t2 || []))
+          :ok
+
+        err ->
+          err
       end
     else
       nil -> {:error, :not_found}
@@ -361,4 +375,20 @@ defmodule Zockelo.Games do
   defp parse_mode("trust"), do: :trust
   defp parse_mode("confirmation"), do: :confirmation
   defp parse_mode(atom) when is_atom(atom), do: atom
+
+  defp enqueue_game_notification(event_type, game_id, tenant_id, player_ids) do
+    trigger_id = "#{event_type}:#{game_id}"
+
+    %{
+      event_type: event_type,
+      game_id: game_id,
+      tenant_id: tenant_id,
+      player_ids: player_ids,
+      trigger_id: trigger_id
+    }
+    |> GameNotificationWorker.new()
+    |> Oban.insert()
+
+    :ok
+  end
 end

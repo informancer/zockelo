@@ -9,7 +9,9 @@ import Config
 
 config :zockelo,
   ecto_repos: [Zockelo.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  smtp_from: System.get_env("SMTP_FROM", "noreply@zockelo.app"),
+  magic_link_base_url: System.get_env("PHX_HOST", "http://localhost:4000")
 
 # EventStore — use jsonb column type for efficient querying
 config :eventstore,

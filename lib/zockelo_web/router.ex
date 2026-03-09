@@ -31,6 +31,12 @@ defmodule ZockeloWeb.Router do
     plug ZockeloWeb.Plugs.RequireTenantAdminPlug
   end
 
+  # CSRF-exempt pipeline for one-click unsubscribe (protected by HMAC).
+  pipeline :no_csrf do
+    plug :accepts, ["html", "text"]
+    plug :fetch_session
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -39,6 +45,12 @@ defmodule ZockeloWeb.Router do
   scope "/", ZockeloWeb do
     pipe_through :api
     get "/sw.js", ServiceWorkerController, :show
+  end
+
+  # One-click unsubscribe — exempt from CSRF, protected by HMAC token.
+  scope "/", ZockeloWeb do
+    pipe_through :no_csrf
+    post "/unsubscribe", UnsubscribeController, :unsubscribe
   end
 
   scope "/", ZockeloWeb do

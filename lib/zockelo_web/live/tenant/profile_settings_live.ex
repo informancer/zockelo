@@ -3,11 +3,13 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
   use ZockeloWeb, :live_view
 
   alias Zockelo.Players
+  alias Zockelo.Notifications
 
   @impl true
   def mount(_params, _session, socket) do
     tenant = socket.assigns.current_tenant
     current_user = socket.assigns.current_user
+    prefs = Notifications.list_preferences(current_user.player_id, tenant.id)
 
     {:ok,
      socket
@@ -18,7 +20,8 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
      |> assign(:email_form, %{"email" => ""})
      |> assign(:confirm_delete, false)
      |> assign(:flash_msg, nil)
-     |> assign(:section, "profile")}
+     |> assign(:section, "profile")
+     |> assign(:notification_prefs, prefs_map(prefs))}
   end
 
   # ---------------------------------------------------------------------------
@@ -65,6 +68,23 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
 
   def handle_event("initiate_email_change", _params, socket) do
     {:noreply, put_flash(socket, :error, "Email cannot be blank.")}
+  end
+
+  # ---------------------------------------------------------------------------
+  # GDPR data export
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # Notification preferences
+  # ---------------------------------------------------------------------------
+
+  def handle_event("toggle_notification", %{"type" => type}, socket) do
+    player_id = socket.assigns.current_user.player_id
+    tenant_id = socket.assigns.tenant.id
+    current = Map.get(socket.assigns.notification_prefs, type, true)
+    :ok = Notifications.set_preference(player_id, tenant_id, type, !current)
+    updated = Map.put(socket.assigns.notification_prefs, type, !current)
+    {:noreply, assign(socket, :notification_prefs, updated)}
   end
 
   # ---------------------------------------------------------------------------
@@ -147,6 +167,32 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
           <button phx-click="export_data" class="btn btn-outline">Download my data</button>
         </section>
 
+        <!-- Notifications -->
+        <section class="space-y-3">
+          <h2 class="font-semibold">Notifications</h2>
+          <p class="text-sm text-gray-500">Choose which emails you receive.</p>
+
+          <div class="space-y-2">
+            <.notif_row type="game_logged" label="Game logged" prefs={@notification_prefs} />
+            <.notif_row type="game_confirmed" label="Game confirmed" prefs={@notification_prefs} />
+            <.notif_row type="game_disputed" label="Game disputed" prefs={@notification_prefs} />
+            <.notif_row type="game_auto_confirmed" label="Game auto-confirmed" prefs={@notification_prefs} />
+          </div>
+
+          <%= if @current_user.role == "tenant_admin" do %>
+            <p class="text-sm text-gray-500 pt-2 font-medium">Admin notifications</p>
+            <div class="space-y-2">
+              <.notif_row type="game_disputed_admin" label="Disputed game (admin)" prefs={@notification_prefs} />
+              <.notif_row type="new_player_via_invite_link" label="New player via invite link" prefs={@notification_prefs} />
+            </div>
+          <% end %>
+
+          <div class="flex items-center justify-between py-1 opacity-50 cursor-not-allowed" title="System notification — cannot be disabled">
+            <span class="text-sm">Inactivity warning</span>
+            <input type="checkbox" class="toggle toggle-sm" checked disabled />
+          </div>
+        </section>
+
         <!-- Danger zone -->
         <section class="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
           <h2 class="font-semibold text-red-700">Delete Account</h2>
@@ -172,6 +218,28 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
   # ---------------------------------------------------------------------------
   # Private
   # ---------------------------------------------------------------------------
+
+  defp notif_row(assigns) do
+    enabled = Map.get(assigns.prefs, assigns.type, true)
+    assigns = assign(assigns, :enabled, enabled)
+
+    ~H"""
+    <div class="flex items-center justify-between py-1">
+      <span class="text-sm"><%= @label %></span>
+      <input
+        type="checkbox"
+        class="toggle toggle-sm toggle-primary"
+        checked={@enabled}
+        phx-click="toggle_notification"
+        phx-value-type={@type}
+      />
+    </div>
+    """
+  end
+
+  defp prefs_map(prefs) do
+    Map.new(prefs, fn p -> {p.notification_type, p.enabled} end)
+  end
 
   defp build_export(player_id, tenant_id) do
     games =
