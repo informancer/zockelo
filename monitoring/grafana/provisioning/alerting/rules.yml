@@ -1,0 +1,188 @@
+# Grafana alerting rule provisioning
+# Requires Grafana 9+ unified alerting
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: zockelo-alerts
+    folder: Zockelo
+    interval: 1m
+    rules:
+      - uid: health-check-failure
+        title: Health Check Failure
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'up{job="zockelo"}'
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+              expression: A
+              type: threshold
+        noDataState: Alerting
+        execErrState: Error
+        for: 2m
+
+      - uid: high-5xx-rate
+        title: High 5xx Error Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'rate(phoenix_router_dispatch_stop_duration_milliseconds_count{status=~"5.."}[5m]) / rate(phoenix_router_dispatch_stop_duration_milliseconds_count[5m]) * 100'
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [5]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+              expression: A
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+
+      - uid: oban-failure-rate
+        title: Oban Failure Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'rate(oban_job_stop_total{state="failure"}[1m]) * 60'
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [10]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+              expression: A
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        for: 2m
+
+      - uid: high-memory-usage
+        title: High Application Memory Usage
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'beam_memory_total_bytes / 1024 / 1024'
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [200]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+              expression: A
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+
+contactPoints:
+  - orgId: 1
+    name: zockelo-notifications
+    receivers:
+      - uid: email-receiver
+        type: email
+        settings:
+          addresses: "${GRAFANA_ALERT_EMAIL}"
+        disableResolveMessage: false
+      - uid: webhook-receiver
+        type: webhook
+        settings:
+          url: "${GRAFANA_WEBHOOK_URL}"
+        disableResolveMessage: false
+
+policies:
+  - orgId: 1
+    receiver: zockelo-notifications
+    group_by: [alertname]
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h

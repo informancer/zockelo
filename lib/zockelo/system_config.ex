@@ -12,7 +12,9 @@ defmodule Zockelo.SystemConfig do
 
   @defaults %{
     "tenant_creation_mode" => "direct",
-    "audit_log_retention_days" => "730"
+    "audit_log_retention_days" => "730",
+    "maintenance_message" => "",
+    "maintenance_scheduled_at" => ""
   }
 
   @doc "Returns the value for `key`, falling back to the built-in default."

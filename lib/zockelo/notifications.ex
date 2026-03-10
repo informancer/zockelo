@@ -15,7 +15,7 @@ defmodule Zockelo.Notifications do
   alias Zockelo.Repo
   alias Zockelo.Notifications.NotificationPreference
 
-  @player_types ~w(game_logged game_confirmed game_disputed game_auto_confirmed)
+  @player_types ~w(game_logged game_confirmed game_disputed game_auto_confirmed maintenance_announcements)
   @admin_types ~w(game_disputed_admin new_player_via_invite_link)
   @system_types ~w(inactivity_warning)
 

@@ -76,6 +76,25 @@ defmodule Zockelo.Notifications.Email do
     Gettext.with_locale(ZockeloWeb.Gettext, locale, fn -> build_tenant_deletion_requested(to_email, opts) end)
   end
 
+  @doc """
+  Maintenance announcement email sent to all active players (system-level, no tenant).
+  Accepts a PlayerProfile struct and a message string.
+  """
+  def maintenance_announcement(player, message) do
+    locale = player.locale || "en"
+    to_email = Zockelo.Crypto.decrypt_field(player.encrypted_email, player.player_id)
+
+    case to_email do
+      nil ->
+        {:error, :email_unavailable}
+
+      email ->
+        Gettext.with_locale(ZockeloWeb.Gettext, locale, fn ->
+          build_maintenance_announcement(email, player, message)
+        end)
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # Private builders
   # ---------------------------------------------------------------------------
@@ -255,5 +274,44 @@ defmodule Zockelo.Notifications.Email do
     </body>
     </html>
     """
+  end
+
+  defp build_maintenance_announcement(email, player, message) do
+    app_name = "Zockelo"
+    subject = dgettext("emails", "Scheduled maintenance — %{app_name}", app_name: app_name)
+    unsubscribe_url =
+      Zockelo.Notifications.unsubscribe_url(
+        player.player_id,
+        player.tenant_id,
+        "maintenance_announcements"
+      )
+
+    html = simple_html(subject, """
+      <h2>#{subject}</h2>
+      <p>#{message}</p>
+      <p style="color:#6b7280;font-size:0.85em;">
+        You received this because you have maintenance announcements enabled.
+        <a href="#{unsubscribe_url}" style="color:#6b7280;">Unsubscribe</a>
+      </p>
+    """)
+
+    text = """
+    #{subject}
+
+    #{message}
+
+    ---
+    To unsubscribe: #{unsubscribe_url}
+    """
+
+    email_struct =
+      system_base(email, subject)
+      |> subject(subject)
+      |> html_body(html)
+      |> text_body(text)
+      |> header("List-Unsubscribe", "<#{unsubscribe_url}>")
+      |> header("List-Unsubscribe-Post", "List-Unsubscribe=One-Click")
+
+    Zockelo.Mailer.deliver(email_struct)
   end
 end

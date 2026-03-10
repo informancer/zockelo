@@ -10,8 +10,29 @@ defmodule Zockelo.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      releases: releases(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      # ExDoc
+      name: "Zockelo",
+      source_url: "https://github.com/informancer/zockelo",
+      docs: [
+        main: "readme",
+        extras: ["README.md", "CHANGELOG.md"] ++ Path.wildcard("guides/*.md"),
+        groups_for_extras: [Guides: ~r/guides\/.+/]
+      ]
+    ]
+  end
+
+  defp releases do
+    [
+      zockelo: [
+        include_executables_for: [:unix],
+        applications: [runtime_tools: :permanent],
+        # Allow 35s for graceful shutdown (matches Oban 30s grace period)
+        steps: [:assemble],
+        shutdown_timeout: 35_000
+      ]
     ]
   end
 
@@ -79,6 +100,11 @@ defmodule Zockelo.MixProject do
       {:oban, "~> 2.19"},
       # Rate limiting
       {:hammer, "~> 6.1"},
+      # Observability
+      {:prom_ex, "~> 1.9"},
+      {:logger_json, "~> 6.0"},
+      {:sentry, "~> 10.8"},
+      {:hackney, "~> 1.18"},
       # Utilities
       {:earmark, "~> 1.4"},
       {:html_sanitize_ex, "~> 1.4"},

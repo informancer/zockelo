@@ -126,6 +126,13 @@ config :phoenix, :json_library, Jason
 # Gettext — default locale English, supported locales en + de
 config :zockelo, ZockeloWeb.Gettext, default_locale: "en", locales: ~w(en de)
 
+# PromEx — metrics export
+config :zockelo, Zockelo.PromEx,
+  manual_metrics_start_delay: :no_delay,
+  drop_metrics_groups: [],
+  grafana: :disabled,
+  metrics_server: :disabled
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

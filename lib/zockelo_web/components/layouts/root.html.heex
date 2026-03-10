@@ -35,6 +35,20 @@
     </script>
   </head>
   <body>
+    <%!-- LiveView reconnecting indicator — shown only when connection is lost --%>
+    <div
+      id="lv-connection-banner"
+      class="hidden fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-white text-center text-sm py-2 px-4"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="lv-reconnecting">Reconnecting…</span>
+      <span class="lv-reload-prompt hidden">
+        Connection lost.
+        <button onclick="window.location.reload()" class="underline font-semibold ml-1">Reload</button>
+      </span>
+    </div>
+
     {@inner_content}
   </body>
 </html>

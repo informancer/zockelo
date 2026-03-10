@@ -7,7 +7,11 @@ defmodule Zockelo.Application do
 
   @impl true
   def start(_type, _args) do
+    # Set up EventStore telemetry handlers before supervision tree starts.
+    Zockelo.Telemetry.EventStoreTelemetry.setup()
+
     children = [
+      Zockelo.PromEx,
       ZockeloWeb.Telemetry,
       Zockelo.Vault,
       Zockelo.Repo,

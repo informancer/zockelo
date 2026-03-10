@@ -57,6 +57,50 @@ window.addEventListener("phx:download_json", ({detail: {filename, content}}) => 
   URL.revokeObjectURL(url)
 })
 
+// LiveView reconnecting indicator
+const connectionBanner = document.getElementById("lv-connection-banner")
+const reconnectingMsg = connectionBanner?.querySelector(".lv-reconnecting")
+const reloadPrompt = connectionBanner?.querySelector(".lv-reload-prompt")
+let reloadTimer = null
+
+window.addEventListener("phx:page-loading-start", () => {
+  if (connectionBanner) {
+    clearTimeout(reloadTimer)
+    connectionBanner.classList.remove("hidden")
+    reconnectingMsg?.classList.remove("hidden")
+    reloadPrompt?.classList.add("hidden")
+    // Show reload prompt after 10 seconds of failed reconnect
+    reloadTimer = setTimeout(() => {
+      reconnectingMsg?.classList.add("hidden")
+      reloadPrompt?.classList.remove("hidden")
+    }, 10000)
+  }
+})
+
+window.addEventListener("phx:page-loading-stop", () => {
+  clearTimeout(reloadTimer)
+  connectionBanner?.classList.add("hidden")
+})
+
+// Maintenance banner dismiss (persisted in localStorage)
+window.__dismissMaintenanceBanner = () => {
+  const banner = document.getElementById("maintenance-banner")
+  if (banner) {
+    const key = banner.dataset.messageKey
+    localStorage.setItem(key, "1")
+    banner.remove()
+  }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const banner = document.getElementById("maintenance-banner")
+  if (banner) {
+    const key = banner.dataset.messageKey
+    if (!localStorage.getItem(key)) {
+      banner.classList.remove("hidden")
+    }
+  }
+})
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

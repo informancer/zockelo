@@ -40,7 +40,27 @@ config :zockelo, ZockeloWeb.Endpoint,
 # Set BUILD_HASH at release/deploy time (e.g. git short SHA).
 config :zockelo, :build_hash, System.get_env("BUILD_HASH", "dev")
 
+# GlitchTip / Sentry error tracking — silent no-op when GLITCHTIP_DSN is unset.
+if dsn = System.get_env("GLITCHTIP_DSN") do
+  config :sentry,
+    dsn: dsn,
+    environment_name: config_env(),
+    enable_source_code_context: true,
+    root_source_code_paths: [File.cwd!()]
+end
+
 if config_env() == :prod do
+  # Fail-fast on missing required environment variables.
+  required_vars = ~w[SECRET_KEY_BASE DATABASE_URL EVENT_STORE_URL CLOAK_KEY PHX_HOST SMTP_HOST SMTP_FROM]
+  missing = Enum.filter(required_vars, &(System.get_env(&1) in [nil, ""]))
+
+  unless missing == [] do
+    raise """
+    Missing required environment variables: #{Enum.join(missing, ", ")}
+    See .env.example for documentation of all required variables.
+    """
+  end
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
@@ -126,21 +146,25 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  # ## Configuring the mailer
-  #
-  # In production you need to configure the mailer to use a different adapter.
-  # Here is an example configuration for Mailgun:
-  #
-  #     config :zockelo, Zockelo.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
-  # and Finch out-of-the-box. This configuration is typically done at
-  # compile-time in your config/prod.exs:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
-  #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # SMTP mailer configuration (gen_smtp adapter)
+  smtp_host = System.get_env("SMTP_HOST", "localhost")
+  smtp_port = System.get_env("SMTP_PORT", "587") |> String.to_integer()
+  smtp_username = System.get_env("SMTP_USERNAME", "")
+  smtp_password = System.get_env("SMTP_PASSWORD", "")
+
+  config :zockelo, Zockelo.Mailer,
+    adapter: Swoosh.Adapters.SMTP,
+    relay: smtp_host,
+    port: smtp_port,
+    username: smtp_username,
+    password: smtp_password,
+    tls: :if_available,
+    auth: :if_available,
+    retries: 2
+
+  config :zockelo,
+    smtp_from: System.get_env("SMTP_FROM", "noreply@zockelo.app")
+
+  # Oban graceful shutdown — allow 30s for in-flight jobs before SIGKILL
+  config :zockelo, Oban, shutdown_grace_period: 30_000
 end

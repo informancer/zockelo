@@ -49,9 +49,17 @@ defmodule ZockeloWeb.Router do
   end
 
   # PWA service worker — must be served from root scope for max-scope registration.
+  # Health check (internal only) and Prometheus metrics (internal only).
   scope "/", ZockeloWeb do
     pipe_through :api
     get "/sw.js", ServiceWorkerController, :show
+    get "/health", HealthController, :check
+  end
+
+  # Prometheus metrics — served by PromEx (internal only; Caddy blocks externally)
+  scope "/" do
+    pipe_through :api
+    get "/metrics", PromEx.Plug, prom_ex_module: Zockelo.PromEx
   end
 
   # One-click unsubscribe — exempt from CSRF, protected by HMAC token.

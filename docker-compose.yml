@@ -1,0 +1,140 @@
+# =============================================================================
+# Zockelo — Production docker-compose
+#
+# Profiles:
+#   default   — app + database only (minimal deployment)
+#   monitoring — adds Prometheus + Grafana
+#   full       — adds Prometheus + Grafana + GlitchTip
+#
+# Usage:
+#   docker compose up -d                          # default profile
+#   docker compose --profile monitoring up -d     # with monitoring
+#   docker compose --profile full up -d           # everything
+#
+# All environment variables are read from .env (see .env.example).
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application
+  # ---------------------------------------------------------------------------
+  app:
+    image: ${IMAGE:-ghcr.io/informancer/zockelo:latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      PHX_SERVER: "true"
+      DATABASE_URL: "ecto://zockelo:${POSTGRES_PASSWORD:-changeme}@db:5432/zockelo_prod"
+      EVENT_STORE_URL: "ecto://zockelo:${POSTGRES_PASSWORD:-changeme}@db:5432/zockelo_eventstore_prod"
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    # Graceful shutdown: give the container 35s before SIGKILL
+    stop_grace_period: 35s
+    entrypoint: >
+      sh -c "./bin/zockelo eval 'Zockelo.Release.migrate()' && ./bin/zockelo start"
+
+  # ---------------------------------------------------------------------------
+  # Database (Postgres 16 — hosts both Ecto and EventStore DBs)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zockelo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: zockelo_prod
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./priv/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zockelo -d zockelo_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Prometheus (monitoring + full profiles)
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    profiles: [monitoring, full]
+    restart: unless-stopped
+    depends_on:
+      - app
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    # Bind to localhost only — not exposed externally
+    ports:
+      - "127.0.0.1:9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+
+  # ---------------------------------------------------------------------------
+  # Grafana (monitoring + full profiles)
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.0.0
+    profiles: [monitoring, full]
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?GF_SECURITY_ADMIN_PASSWORD is required}
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_SERVER_ROOT_URL: "http://localhost:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    # Bind to localhost only — not exposed externally
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  # ---------------------------------------------------------------------------
+  # GlitchTip (full profile only)
+  # ---------------------------------------------------------------------------
+  glitchtip:
+    image: glitchtip/glitchtip:v4
+    profiles: [full]
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://zockelo:${POSTGRES_PASSWORD:-changeme}@db:5432/glitchtip"
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?GLITCHTIP_SECRET_KEY is required}
+      EMAIL_URL: "smtp://${SMTP_USERNAME}:${SMTP_PASSWORD}@${SMTP_HOST}:${SMTP_PORT:-587}"
+      DEFAULT_FROM_EMAIL: ${SMTP_FROM:-noreply@example.com}
+      GLITCHTIP_DOMAIN: "http://localhost:8000"
+      ENABLE_OPEN_USER_REGISTRATION: "False"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - glitchtip_uploads:/code/uploads
+
+  glitchtip_worker:
+    image: glitchtip/glitchtip:v4
+    profiles: [full]
+    restart: unless-stopped
+    depends_on:
+      - glitchtip
+    environment:
+      DATABASE_URL: "postgresql://zockelo:${POSTGRES_PASSWORD:-changeme}@db:5432/glitchtip"
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?GLITCHTIP_SECRET_KEY is required}
+    command: ./bin/run-celery-with-beat.sh
+
+volumes:
+  pg_data:
+  prometheus_data:
+  grafana_data:
+  glitchtip_uploads:

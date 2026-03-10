@@ -260,18 +260,28 @@ defmodule ZockeloWeb.Tenant.GameNewLive do
       </div>
     </div>
 
-    <!-- Player picker overlay -->
+    <!-- Player picker overlay — focus trap: focus enters search input on open; Escape closes -->
     <%= if @picker_open do %>
-      <div class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4"
-           phx-click="close_picker">
+      <div
+        class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4"
+        phx-click="close_picker"
+        phx-key="Escape"
+        phx-window-keydown="close_picker"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Pick a player"
+      >
         <div class="bg-white rounded-2xl w-full max-w-sm max-h-[70vh] flex flex-col shadow-2xl"
-             phx-click-away="close_picker">
+             phx-click-away="close_picker"
+             id="picker-overlay">
           <div class="p-4 border-b">
             <input type="text" placeholder="Search players…"
                    phx-keyup="search_picker" phx-value-q=""
                    name="picker_search"
                    value={@picker_search}
-                   class="input input-bordered w-full" autofocus />
+                   class="input input-bordered w-full"
+                   autofocus
+                   aria-label="Search players" />
           </div>
           <div class="overflow-y-auto flex-1 p-2 space-y-1">
             <%= for {profile, rating} <- filtered_players(@players, @picker_search) do %>
@@ -321,11 +331,21 @@ defmodule ZockeloWeb.Tenant.GameNewLive do
 
     ~H"""
     <div class="relative">
-      <button phx-click="open_picker" phx-value-slot={@slot}
-              class="w-full rounded-xl bg-white/20 hover:bg-white/30 text-white p-3 text-left transition min-h-[60px] flex items-center gap-2">
+      <button
+        phx-click="open_picker"
+        phx-value-slot={@slot}
+        tabindex="0"
+        aria-label={if @player_info do
+          {profile, rating} = @player_info
+          "#{@slot_label} — #{display_name(profile)}, rating #{rating.rating}. Press Enter to change."
+        else
+          "#{@slot_label} — Empty. Press Enter to pick a player."
+        end}
+        class="w-full rounded-xl bg-white/20 hover:bg-white/30 text-white p-3 text-left transition min-h-[60px] flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+      >
         <%= if @player_info do %>
           <% {profile, rating} = @player_info %>
-          <div class="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-xs font-bold text-green-800">
+          <div class="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-xs font-bold text-green-800" aria-hidden="true">
             <%= String.first(display_name(profile)) %>
           </div>
           <div class="flex-1 min-w-0">
@@ -333,7 +353,7 @@ defmodule ZockeloWeb.Tenant.GameNewLive do
             <p class="text-xs text-white/70"><%= rating.rating %></p>
           </div>
         <% else %>
-          <div class="w-8 h-8 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center text-white/50 text-sm">+</div>
+          <div class="w-8 h-8 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center text-white/50 text-sm" aria-hidden="true">+</div>
           <span class="text-white/60 text-xs"><%= if @slot_label != "", do: @slot_label, else: "Tap to pick" %></span>
         <% end %>
       </button>

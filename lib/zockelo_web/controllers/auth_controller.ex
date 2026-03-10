@@ -2,6 +2,8 @@ defmodule ZockeloWeb.AuthController do
   @moduledoc "Handles magic link verification and session creation."
   use ZockeloWeb, :controller
 
+  require Logger
+
   alias Zockelo.{Auth, Players, Tenants}
 
   @doc """
@@ -18,6 +20,12 @@ defmodule ZockeloWeb.AuthController do
       destination = return_to || post_login_path(profile, tenant)
 
       Players.record_login(player_id)
+
+      Logger.info("auth.login",
+        player_id: player_id,
+        tenant_id: profile.tenant_id,
+        destination: destination
+      )
 
       conn
       |> configure_session(renew: true)
@@ -55,7 +63,11 @@ defmodule ZockeloWeb.AuthController do
   @doc "Logs the current user out by deleting their session."
   def logout(conn, _params) do
     session_id = get_session(conn, "session_id")
-    if session_id, do: Auth.delete_session(session_id)
+
+    if session_id do
+      Auth.delete_session(session_id)
+      Logger.info("auth.logout", session_id: session_id)
+    end
 
     conn
     |> delete_session("session_id")

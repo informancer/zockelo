@@ -49,7 +49,7 @@ defmodule ZockeloWeb.Tenant.LeaderboardLive do
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Games</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-gray-100" aria-live="polite" aria-label="Leaderboard standings">
                 <%= for {{profile, rating}, idx} <- Enum.with_index(@players) do %>
                   <tr class={if(profile.player_id == @current_user.player_id, do: "bg-blue-50", else: "")}>
                     <td class="px-4 py-3 text-sm font-semibold text-gray-400"><%= idx + 1 %></td>

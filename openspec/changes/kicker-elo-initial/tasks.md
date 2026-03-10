@@ -223,26 +223,26 @@
 
 ## 19. Observability and Deployment
 
-- [ ] 19.1 Add dependencies: `prom_ex`, `logger_json`, `sentry` (GlitchTip-compatible)
-- [ ] 19.2 Configure `logger_json` as the log formatter in production config
-- [ ] 19.3 Implement structured log calls for: auth events, Oban failures, projection errors, admin actions
-- [ ] 19.4 Configure PromEx with Phoenix, LiveView, Ecto, Oban, and VM metric groups
-- [ ] 19.5 Add custom telemetry events for EventStore write/read latency; wire to PromEx
-- [ ] 19.6 Implement `GET /health` endpoint: check Ecto repo + EventStore connectivity; return `{"status": "ok"}` on 200 or `{"status": "error", "reason": "database_unavailable"}` on 503; no version or build info in response; endpoint is NOT publicly accessible — Caddy blocks this path from external callers; Docker HEALTHCHECK uses `curl -f http://localhost:4000/health` inside the container; Grafana probes it via internal Docker network hostname
-- [ ] 19.7 Configure GlitchTip integration via `GLITCHTIP_DSN` env var; silent no-op when unset
-- [ ] 19.8 Write `docker-compose.yml` with default, `monitoring`, and `full` profiles; bind Grafana, GlitchTip, and Prometheus ports to `127.0.0.1` only (e.g. `127.0.0.1:3000:3000`); do NOT map `/metrics` or `/health` to any host port — Prometheus scrapes `/metrics` and Grafana probes `/health` container-to-container via internal Docker network only; pass `GF_SECURITY_ADMIN_PASSWORD` from env to Grafana container; pass `GLITCHTIP_SUPERUSER_EMAIL` and `GLITCHTIP_SUPERUSER_PASSWORD` from env to GlitchTip container
-- [ ] 19.9 Write Grafana dashboard provisioning files (application overview, LiveView, Oban, DB, BEAM VM)
-- [ ] 19.10 Write `.env.example` documenting all required and optional environment variables with descriptions (required vs optional, example values); fail-fast check in `config/runtime.exs` for missing required vars (`SECRET_KEY_BASE`, `DATABASE_URL`, `CLOAK_KEY`, `PHX_HOST`, `SMTP_HOST`, `SMTP_FROM`)
-- [ ] 19.11 Write multi-stage `Dockerfile`: Elixir build stage + minimal Debian runtime stage; entrypoint executes `./bin/zockelo eval "Zockelo.Release.migrate()"` before starting the server
-- [ ] 19.12 Configure `mix release` in `mix.exs`; implement `Zockelo.Release.migrate/0` module
-- [ ] 19.13 Write GitHub Actions workflow (`.github/workflows/ci.yml`) following Gitflow conventions:
+- [x] 19.1 Add dependencies: `prom_ex`, `logger_json`, `sentry` (GlitchTip-compatible)
+- [x] 19.2 Configure `logger_json` as the log formatter in production config
+- [x] 19.3 Implement structured log calls for: auth events, Oban failures, projection errors, admin actions
+- [x] 19.4 Configure PromEx with Phoenix, LiveView, Ecto, Oban, and VM metric groups
+- [x] 19.5 Add custom telemetry events for EventStore write/read latency; wire to PromEx
+- [x] 19.6 Implement `GET /health` endpoint: check Ecto repo + EventStore connectivity; return `{"status": "ok"}` on 200 or `{"status": "error", "reason": "database_unavailable"}` on 503; no version or build info in response; endpoint is NOT publicly accessible — Caddy blocks this path from external callers; Docker HEALTHCHECK uses `curl -f http://localhost:4000/health` inside the container; Grafana probes it via internal Docker network hostname
+- [x] 19.7 Configure GlitchTip integration via `GLITCHTIP_DSN` env var; silent no-op when unset
+- [x] 19.8 Write `docker-compose.yml` with default, `monitoring`, and `full` profiles; bind Grafana, GlitchTip, and Prometheus ports to `127.0.0.1` only (e.g. `127.0.0.1:3000:3000`); do NOT map `/metrics` or `/health` to any host port — Prometheus scrapes `/metrics` and Grafana probes `/health` container-to-container via internal Docker network only; pass `GF_SECURITY_ADMIN_PASSWORD` from env to Grafana container; pass `GLITCHTIP_SUPERUSER_EMAIL` and `GLITCHTIP_SUPERUSER_PASSWORD` from env to GlitchTip container
+- [x] 19.9 Write Grafana dashboard provisioning files (application overview, LiveView, Oban, DB, BEAM VM)
+- [x] 19.10 Write `.env.example` documenting all required and optional environment variables with descriptions (required vs optional, example values); fail-fast check in `config/runtime.exs` for missing required vars (`SECRET_KEY_BASE`, `DATABASE_URL`, `CLOAK_KEY`, `PHX_HOST`, `SMTP_HOST`, `SMTP_FROM`)
+- [x] 19.11 Write multi-stage `Dockerfile`: Elixir build stage + minimal Debian runtime stage; entrypoint executes `./bin/zockelo eval "Zockelo.Release.migrate()"` before starting the server
+- [x] 19.12 Configure `mix release` in `mix.exs`; implement `Zockelo.Release.migrate/0` module
+- [x] 19.13 Write GitHub Actions workflow (`.github/workflows/ci.yml`) following Gitflow conventions:
   - **Quality gate job** (format, credo, sobelow, audit, dialyzer, test with coverage): triggered on PRs targeting `develop` or `main`; push to `develop`, `release/**`, `hotfix/**`
   - **Publish `edge` image**: triggered on push to `develop` after quality gate passes; tags: `edge` + commit SHA
   - **Publish `latest` image**: triggered on push to `main` (Gitflow merge, quality gate already ran); tags: `latest` + commit SHA
   - **Publish versioned image**: triggered on push of `v*` tag (created by `git flow release/hotfix finish`); tags: `vX.Y.Z` + `latest` + commit SHA
   - All publish jobs authenticate to GHCR via built-in `GITHUB_TOKEN`; set package visibility to public
   - PLT cache keyed on Elixir/OTP versions for fast dialyzer runs
-- [ ] 19.14 Configure ExDoc in `mix.exs` with `guides/` as extras source; write guide pages:
+- [x] 19.14 Configure ExDoc in `mix.exs` with `guides/` as extras source; write guide pages:
   - **Operator setup**: first deployment via `setup.sh`, upgrades via `setup.sh --upgrade`, version pinning, env vars, Docker profiles
   - **Observability access**: all tools (Grafana, GlitchTip, Prometheus) are bound to `127.0.0.1` and not publicly exposed; access via SSH tunnel (`ssh -L 3000:localhost:3000 user@host`); Grafana admin password is generated by `setup.sh` (no manual first-login change needed); GlitchTip admin credentials generated by `setup.sh --full` (no manual first-time setup needed); `/health` accessible only within Docker network (Caddy blocks externally); external uptime monitoring should probe `/:tenant_slug/login` instead; alternative: expose via reverse proxy subdomain with authentication (operator's responsibility)
   - **Backups**: what to back up (Postgres DB, `player_keys` table criticality, `.env`/secrets), schedule, restore, verify
@@ -255,136 +255,136 @@
   - **International data transfers**: if server is outside EU/EEA, operator may need SCCs or adequacy basis under GDPR Art. 46; operator is responsible for compliance
   - **Self-hosted DPA note**: tenant is both controller and processor — no DPA required; if ever offered as managed SaaS, Art. 28 DPA is required
   - **Tenant admin guide**, **architecture overview** (event sourcing, crypto-shredding, stream-per-tenant, event versioning)
-- [ ] 19.15 Add `plug Plug.RequestId` to the endpoint (Phoenix default; confirm it is present and that `request_id` appears in all structured log entries)
-- [ ] 19.18 Add `mix phx.digest` as a build step in the multi-stage Dockerfile (after `mix assets.deploy`); confirm fingerprinted assets are served with `Cache-Control: public, max-age=31536000, immutable` via `Plug.Static`
-- [ ] 19.20 Write `setup.sh` standalone deployment script with two modes:
+- [x] 19.15 Add `plug Plug.RequestId` to the endpoint (Phoenix default; confirm it is present and that `request_id` appears in all structured log entries)
+- [x] 19.18 Add `mix phx.digest` as a build step in the multi-stage Dockerfile (after `mix assets.deploy`); confirm fingerprinted assets are served with `Cache-Control: public, max-age=31536000, immutable` via `Plug.Static`
+- [x] 19.20 Write `setup.sh` standalone deployment script with two modes:
   - **Default (first install)**: check prerequisites (`docker`, `docker compose`, `curl`, `openssl`); if `docker-compose.yml` absent, download from canonical raw GitHub URL and print URL for operator verification; skip download if file already present; back up existing `.env` with timestamp; auto-generate `SECRET_KEY_BASE` (64 bytes), `CLOAK_KEY` (32 bytes), Postgres password, and `GRAFANA_ADMIN_PASSWORD` (32 bytes) via `openssl rand`; prompt for `PHX_HOST`, `SMTP_HOST`, `SMTP_FROM` (required, re-prompt on blank); prompt for optional values with defaults (`SMTP_PORT`=587, `SMTP_USERNAME`, `SMTP_PASSWORD`, `GRAFANA_ALERT_EMAIL`); numbered profile menu with RAM estimates; write `.env` with `IMAGE=ghcr.io/informancer/zockelo:latest`, commented-out blank optionals and generation timestamp; display security reminder to store secrets; offer to run `docker compose [--profile] up -d`; print the release eval command for super admin creation; if monitoring or full profile selected: wait for Grafana to become healthy, then print SSH tunnel command and generated Grafana admin credentials; if full profile selected: after GlitchTip becomes healthy, call GlitchTip HTTP API to create org + project + retrieve DSN, write `GLITCHTIP_DSN` to `.env`, restart app container; if GlitchTip API calls fail after 60-second timeout, print warning with manual instructions and continue
   - **Upgrade mode (`--upgrade`)**: download new `docker-compose.yml` (back up existing with timestamp, print diff hint); download new `.env.example` to a temp file; compare against existing `.env` and identify variables that are absent or blank; prompt for each such variable (with defaults); append absent variables, fill in blank ones; leave all non-empty values untouched; run `docker compose pull`; run `docker compose up -d` (migrations run automatically on startup); print release notes URL
   - Both modes: coloured output (green/yellow/red); idempotent; safe to re-run
-- [ ] 19.19 Implement `Zockelo.Release.rotate_cloak_key/0` mix task and document the key rotation procedure in the operator guide: configure secondary key in `config/runtime.exs`, run re-encryption task, promote new key to primary, remove old key
-- [ ] 19.16 Write Grafana alerting rule provisioning files (YAML): health check failure, 5xx error rate >5%, Oban failure rate >10/min, app RAM >200MB; configure contact point from `GRAFANA_ALERT_EMAIL` / `GRAFANA_WEBHOOK_URL` env vars in `docker-compose.yml`
-- [ ] 19.17 Configure graceful shutdown in Mix release: set `:shutdown` timeout to 35000ms in `rel/config.exs` or `mix.exs` releases config; set `config :oban, shutdown_grace_period: 30_000`; document in operator guide that `docker stop` sends SIGTERM with a matching timeout
-- [ ] 19.21 Document Caddy reverse proxy configuration in operator guide: (a) default single-domain setup — all tenants at `/{slug}/`, `/admin` at `/admin`, no special config needed; (b) per-tenant custom domain setup — complete step-by-step flow with copy-pasteable Caddy block using `rewrite * /{slug}{uri}` + `reverse_proxy app:4000 { header_up X-Forwarded-Host {host} }`; (c) DNS requirements: A record to server IP or CNAME to PHX_HOST; propagation up to 48h; (d) TLS: Caddy ACME HTTP-01 requires port 80 open; document DNS-01 alternative for restricted environments; (e) set `TRUST_PROXY_HEADERS=true` in `.env`; (f) super admin panel only accessible via `PHX_HOST/admin` — custom domain routes `/admin` to the tenant admin panel, not the super admin panel; (g) slug immutability note: if tenant slug changes, the Caddy block must be updated
+- [x] 19.19 Implement `Zockelo.Release.rotate_cloak_key/0` mix task and document the key rotation procedure in the operator guide: configure secondary key in `config/runtime.exs`, run re-encryption task, promote new key to primary, remove old key
+- [x] 19.16 Write Grafana alerting rule provisioning files (YAML): health check failure, 5xx error rate >5%, Oban failure rate >10/min, app RAM >200MB; configure contact point from `GRAFANA_ALERT_EMAIL` / `GRAFANA_WEBHOOK_URL` env vars in `docker-compose.yml`
+- [x] 19.17 Configure graceful shutdown in Mix release: set `:shutdown` timeout to 35000ms in `rel/config.exs` or `mix.exs` releases config; set `config :oban, shutdown_grace_period: 30_000`; document in operator guide that `docker stop` sends SIGTERM with a matching timeout
+- [x] 19.21 Document Caddy reverse proxy configuration in operator guide: (a) default single-domain setup — all tenants at `/{slug}/`, `/admin` at `/admin`, no special config needed; (b) per-tenant custom domain setup — complete step-by-step flow with copy-pasteable Caddy block using `rewrite * /{slug}{uri}` + `reverse_proxy app:4000 { header_up X-Forwarded-Host {host} }`; (c) DNS requirements: A record to server IP or CNAME to PHX_HOST; propagation up to 48h; (d) TLS: Caddy ACME HTTP-01 requires port 80 open; document DNS-01 alternative for restricted environments; (e) set `TRUST_PROXY_HEADERS=true` in `.env`; (f) super admin panel only accessible via `PHX_HOST/admin` — custom domain routes `/admin` to the tenant admin panel, not the super admin panel; (g) slug immutability note: if tenant slug changes, the Caddy block must be updated
 
 ## 20. Maintenance
 
-- [ ] 20.1 Add `maintenance_message` and `maintenance_scheduled_at` fields to system config (super admin panel); clear fields to end maintenance mode
-- [ ] 20.2 Build maintenance banner component: shown on all authenticated and unauthenticated pages when message is set; dismissable per session (localStorage); reappears if message changes
-- [ ] 20.3 Add "maintenance announcements" as a configurable notification type in `player_notification_preferences` (default: enabled); include `List-Unsubscribe` + `List-Unsubscribe-Post` headers
-- [ ] 20.4 Build maintenance email broadcast in super admin panel: sends to all active players with notification enabled; uses `app_name` in subject; includes unsubscribe link
-- [ ] 20.5 Document projection rebuild procedure in operator guide: put app in maintenance mode, run `mix commanded.reset_projections`, restart app, clear maintenance message
+- [x] 20.1 Add `maintenance_message` and `maintenance_scheduled_at` fields to system config (super admin panel); clear fields to end maintenance mode
+- [x] 20.2 Build maintenance banner component: shown on all authenticated and unauthenticated pages when message is set; dismissable per session (localStorage); reappears if message changes
+- [x] 20.3 Add "maintenance announcements" as a configurable notification type in `player_notification_preferences` (default: enabled); include `List-Unsubscribe` + `List-Unsubscribe-Post` headers
+- [x] 20.4 Build maintenance email broadcast in super admin panel: sends to all active players with notification enabled; uses `app_name` in subject; includes unsubscribe link
+- [x] 20.5 Document projection rebuild procedure in operator guide: put app in maintenance mode, run `mix commanded.reset_projections`, restart app, clear maintenance message
 
 ## 21. Accessibility and Error Pages
 
-- [ ] 21.1 Configure custom `ErrorHTML` and `ErrorJSON` modules for 404 and 500 responses; render standard application layout (with footer) but no auth required; no stack traces in production
-- [ ] 21.2 Build 404 LiveView/template with link back to home page; use this response for both unknown routes and tenant isolation denials
-- [ ] 21.3 Build 500 template with generic message; wire to GlitchTip capture
-- [ ] 21.4 Configure Phoenix LiveView `disconnected` and `reconnecting` UI: show inline reconnecting indicator; show reload prompt after reconnect timeout
-- [ ] 21.5 Make all SVG foosball table position slots focusable (`tabindex`) and activatable via Enter/Space; add ARIA labels (`aria-label="Team 1 Front — Alice, rating 1842"`)
-- [ ] 21.6 Implement focus trap in player card picker overlay (focus on filter input on open, Escape closes and returns focus to triggering slot)
-- [ ] 21.7 Add `aria-live="polite"` region wrapping the leaderboard table body for screen reader announcements on rating updates
-- [ ] 21.8 Audit all text and interactive elements for WCAG AA colour contrast (4.5:1 minimum); ensure SVG team colours are supplemented with text labels ("Team 1", "Team 2")
-- [ ] 21.9 Verify all interactive elements (buttons, nav items, position slots, player cards) meet 44×44px touch target at 375px viewport width; add CSS padding/min-size as needed
-- [ ] 21.10 Run axe-core automated scan against all major pages; resolve any reported WCAG 2.1 AA violations
-- [ ] 21.11 Add `:focus-visible` styles to all interactive elements (buttons, links, nav items, position slots, form inputs, toggles); ensure no `outline: none` without a visible custom replacement; verify contrast of focus ring meets 3:1 against adjacent colours (WCAG 2.4.11)
-- [ ] 21.12 Wrap all CSS transitions and animations in `@media (prefers-reduced-motion: no-preference)` blocks; verify state changes are instant under `prefers-reduced-motion: reduce` (affects: theme toggle, overlay open/close, maintenance banner, PWA reload banner, LiveView diff animations)
+- [x] 21.1 Configure custom `ErrorHTML` and `ErrorJSON` modules for 404 and 500 responses; render standard application layout (with footer) but no auth required; no stack traces in production
+- [x] 21.2 Build 404 LiveView/template with link back to home page; use this response for both unknown routes and tenant isolation denials
+- [x] 21.3 Build 500 template with generic message; wire to GlitchTip capture
+- [x] 21.4 Configure Phoenix LiveView `disconnected` and `reconnecting` UI: show inline reconnecting indicator; show reload prompt after reconnect timeout
+- [x] 21.5 Make all SVG foosball table position slots focusable (`tabindex`) and activatable via Enter/Space; add ARIA labels (`aria-label="Team 1 Front — Alice, rating 1842"`)
+- [x] 21.6 Implement focus trap in player card picker overlay (focus on filter input on open, Escape closes and returns focus to triggering slot)
+- [x] 21.7 Add `aria-live="polite"` region wrapping the leaderboard table body for screen reader announcements on rating updates
+- [x] 21.8 Audit all text and interactive elements for WCAG AA colour contrast (4.5:1 minimum); ensure SVG team colours are supplemented with text labels ("Team 1", "Team 2")
+- [x] 21.9 Verify all interactive elements (buttons, nav items, position slots, player cards) meet 44×44px touch target at 375px viewport width; add CSS padding/min-size as needed
+- [x] 21.10 Run axe-core automated scan against all major pages; resolve any reported WCAG 2.1 AA violations
+- [x] 21.11 Add `:focus-visible` styles to all interactive elements (buttons, links, nav items, position slots, form inputs, toggles); ensure no `outline: none` without a visible custom replacement; verify contrast of focus ring meets 3:1 against adjacent colours (WCAG 2.4.11)
+- [x] 21.12 Wrap all CSS transitions and animations in `@media (prefers-reduced-motion: no-preference)` blocks; verify state changes are instant under `prefers-reduced-motion: reduce` (affects: theme toggle, overlay open/close, maintenance banner, PWA reload banner, LiveView diff animations)
 
 ## 22. Testing
 
-- [ ] 22.1 Unit tests for Elo calculation (expected score, K-factor decay, delta application)
-- [ ] 22.2 Unit tests for team balancer algorithm (all pairing combinations for 2/3/4 players)
-- [ ] 22.3 Unit tests for score validation logic
-- [ ] 22.4 Aggregate tests for `Game`, `Player`, `Tenant` (command → event assertions)
-- [ ] 22.5 Projection tests for `PlayerRatingsProjection` (replay scenarios)
-- [ ] 22.6 Integration tests for crypto-shredding (encrypt, delete key, verify graceful degradation)
-- [ ] 22.7 Test data export: correct content, correct format, access control (player-only)
-- [ ] 22.8 Integration tests for magic link flow (generate, verify, expiry, reuse)
-- [ ] 22.9 LiveView tests for game logging form: score validation, winning condition gate, team picker (player greyed out after assignment; unblocked on slot reassignment; same player blocked in both same-team and opposing-team slots), slot correction, duplicate player_id rejected at backend
-- [ ] 22.10 LiveView tests for confirmation flow (confirm, dispute, auto-confirm)
-- [ ] 22.11 Test inactivity warning email sent at 30-day threshold
-- [ ] 22.12 Test login cancels pending deletion and resets inactivity clock
-- [ ] 22.13 Test imprint warning when mandatory fields missing
-- [ ] 22.14 Test privacy notice renders controller identity from imprint fields
-- [ ] 22.15 Test locale resolution order (preference → browser → fallback)
-- [ ] 22.16 Test invite email sent in tenant default locale when no user preference exists
-- [ ] 22.17 Test tenant isolation plug — protected routes: player from tenant A denied access to `/:tenant_b_slug/` and `/:tenant_b_slug/games` (returns 404); player who is a member of both tenants can access both dashboards
-- [ ] 22.17b Test tenant isolation plug — public routes: authenticated player from tenant A can access `/:tenant_b_slug/login`, `/:tenant_b_slug/imprint`, `/:tenant_b_slug/privacy`, and `/:tenant_b_slug/join` without a 404; unauthenticated visitor can also access all four
-- [ ] 22.18 Test IDOR prevention: tenant-scoped query returns 404 for cross-tenant resource access
-- [ ] 22.19 Test rate limiting: magic link endpoint blocked after threshold per email and per IP
-- [ ] 22.20 Test security headers present on all responses
-- [ ] 22.21 Test session ID regenerated on login
-- [ ] 22.22 Test admin audit log entries written for all security-sensitive actions
-- [ ] 22.23 Verify all migrations include required indexes (review against performance spec)
-- [ ] 22.24 Verify leaderboard query uses (tenant_id, rating DESC) index via EXPLAIN ANALYZE
-- [ ] 22.25 Verify token lookup queries use unique indexes (magic_link_tokens, sessions)
-- [ ] 22.26 Test `/health` endpoint: returns 200 with `{"status": "ok"}` when healthy; returns 503 with `{"status": "error", "reason": "database_unavailable"}` when DB unreachable; response body does NOT contain a `version` field; Caddy config test: `/health` path is not proxied externally
-- [ ] 22.27 Test game history filtering: player filter, date range filter, combined filters, URL reflection
-- [ ] 22.28 Test 404 page returned for unknown routes and tenant isolation denials
-- [ ] 22.29 Test missing required env var causes fast fail with clear error message on startup
-- [ ] 22.30 Test Chart.js hook mounts correctly and receives rating history data via LiveView assigns
-- [ ] 22.31 LiveView test for help page rendering tenant-specific config (confirmation mode on/off, rounds to win)
-- [ ] 22.32 Test unsubscribe HMAC token: valid token disables preference; invalid/tampered token rejected
-- [ ] 22.33 Test maintenance banner shown when message set, dismissed per session, reappears on message change
-- [ ] 22.34 Test event upcaster: V1 event replayed through projection produces same result as native V2 event
-- [ ] 22.35 Test CSRF protection: POST to a form endpoint without a CSRF token returns 403; POST /unsubscribe without a session but with a valid HMAC token succeeds (CSRF exempt)
-- [ ] 22.36 Test robots.txt: `GET /robots.txt` returns 200 with `Disallow: /` in body
-- [ ] 22.37 Test Oban unique job constraint: enqueuing two notification jobs with the same `{worker, player_id, notification_type, trigger_id}` results in only one job in the queue
-- [ ] 22.38 Test graceful shutdown: application process responds to SIGTERM and exits with code 0 within configured timeout
-- [ ] 22.39 Test role revocation takes effect immediately: revoke tenant admin role, verify next request to admin panel returns 403/404 without re-login
-- [ ] 22.40 Test role grant takes effect immediately: grant tenant admin role, verify next request to admin panel succeeds without re-login
-- [ ] 22.41 Test constant-time token comparison: verify magic link and session token verification calls `:crypto.hash_equals/2` (inspect via code review or mock in unit test)
-- [ ] 22.42 Test mass assignment: submit a form payload containing `role` and `tenant_id` extra fields; verify they are not applied to the record
-- [ ] 22.43 Test CRLF injection rejection: submit an email address containing `\r\n`; verify changeset returns a validation error
-- [ ] 22.44 Test dev routes unavailable outside dev: request `/dev/dashboard` in test env, verify 404
-- [ ] 22.45 Test open redirect: verify relative `return_to` is honoured; verify absolute URL and `//host` values are discarded and redirect goes to dashboard
-- [ ] 22.46 Test privacy notice includes: right to lodge supervisory authority complaint; explicit "no third-party recipients"; explicit "no third-country transfers"; `retention_period_days` rendered as a concrete number
-- [ ] 22.47 Test email templates contain no external URLs: assert no `<img>`, `<link>`, or `<script>` src/href attributes reference an external domain in any generated email
-- [ ] 22.48 Test `mix phx.digest` output: verify fingerprinted asset filenames exist in `priv/static/cache_manifest.json` after build
-- [ ] 22.49 Test CLOAK_KEY rotation task: run re-encryption against test fixtures, verify all player keys decrypt correctly under the new key and fail gracefully under the old key after rotation
-- [ ] 22.50 Test Elo rating floor: compute delta that would push rating below 100; verify result is clamped to 100
-- [ ] 22.51 Test player self-deletion: player initiates deletion from profile settings; verify crypto-shredding flow executes, session is revoked, and deleted player cannot request a magic link
-- [ ] 22.52 Test all email templates include both html_body and text_body (no HTML-only emails)
-- [ ] 22.53 Test Oban queue assignment: verify each worker module declares the correct queue (`notifications`, `scheduled`, or `critical`)
-- [ ] 22.54 Test `Zockelo.ReleaseTasks.create_super_admin/1`: creates super admin on first call; returns warning and no-ops on second call with same email
-- [ ] 22.55 Test `setup.sh` first-install mode: run in a temp directory with Docker, curl, and openssl mocked; verify it downloads `docker-compose.yml` when absent and skips download when present; verify it writes a valid `.env` containing all required keys including `IMAGE=ghcr.io/informancer/zockelo:latest`; verify `SECRET_KEY_BASE` and `CLOAK_KEY` are non-empty base64 strings; verify existing `.env` is backed up before overwrite; verify it does not proceed if a required prompt is left blank
-- [ ] 22.68 Test `setup.sh --upgrade` mode — absent and blank variables: run with a pre-existing `.env` containing one variable with a value, one absent variable, and one blank variable; provide a matching mock `.env.example`; verify the absent and blank variables are prompted for; verify the already-set variable is not prompted; verify `docker-compose.yml` is replaced and old one is backed up with timestamp; verify `docker compose pull` and `docker compose up -d` are called; verify no secret regeneration occurs
-- [ ] 22.69 Test `setup.sh --upgrade` mode — all variables set: run with a pre-existing `.env` where every variable in the mock `.env.example` already has a non-empty value; verify the script runs fully non-interactively (no prompts); verify `docker compose pull` and `docker compose up -d` are still called
-- [ ] 22.70 Test magic link token expiry: verify a token older than 15 minutes is rejected with an expiry error; verify a token within 15 minutes is accepted
-- [ ] 22.71 Test session absolute max lifetime: create a session with `created_at` set to 8 days ago; verify the request is rejected and the player is redirected to login
-- [ ] 22.72 Test point-of-collection privacy summary: first magic link verification for a new player renders the privacy summary screen; subsequent login for an already-activated player skips it and redirects directly to dashboard
-- [ ] 22.73 Test privacy notice includes: how to exercise each right (Art. 15, 16, 17, 20, 21) with in-app instructions; Art. 18 restriction unavailability note; session cookie idle timeout and absolute max lifetime as concrete values; magic link token TTL (15 min) as a concrete value
-- [ ] 22.74 Test supervisory authority lookup: `AT` → DSB name and URL; `FR` → CNIL; `DE` → BfDI with Germany note flag set; `GB` → ICO; unknown code → `:unknown`; nil → `:unknown`
-- [ ] 22.75 Test privacy notice renders authority from current imprint country: set country to `NL`, render notice, verify Autoriteit Persoonsgegevens is shown; update country to `AT`, render again, verify DSB is shown — no app restart required
-- [ ] 22.76 Test missing country shows placeholder in privacy notice and warning in admin panel
-- [ ] 22.77 Test game logging winning condition: submit button disabled until team reaches rounds_to_win; enabled immediately when threshold is met
-- [ ] 22.78 Test trust-mode submission feedback: after LogGame command, flash message "Game logged — ratings updated" is shown and player is on dashboard
-- [ ] 22.79 Test confirmation-mode submission feedback: flash shows "Game logged — waiting for confirmation from [name]"; pending game card is visible on dashboard
-- [ ] 22.80 Test player deletion voids pending games: delete a participant; verify all their pending games receive GameVoided event
-- [ ] 22.81 Test config snapshot in GameLogged event: change rounds_to_win after logging a game; verify the stored event retains the original rounds_to_win value
-- [ ] 22.82 Test invite link URL format: generated link follows /:tenant_slug/join?code={token} pattern
-- [ ] 22.83 Test revoked invite link renders error page (not a 404 or crash)
-- [ ] 22.91 Test invite link rotation: clicking Rotate shows confirmation prompt without invalidating the link; confirming invalidates the old token immediately and displays a new URL; old token returns "no longer valid" error; new token is valid
-- [ ] 22.92 Test invite link expiry UI: setting an expiry date persists it; clearing returns to "No expiry"; link becomes invalid after expiry date passes
-- [ ] 22.93 Test custom_domain uniqueness: saving a custom_domain already used by another tenant returns a validation error and does not update the record
-- [ ] 22.94 Test magic link URL uses custom_domain when set; reverts to PHX_HOST after custom_domain is cleared
-- [ ] 22.95 Test TRUST_PROXY_HEADERS=false (unset): X-Forwarded-Host header is ignored; application uses raw request host
-- [ ] 22.96 Test TRUST_PROXY_HEADERS=true: X-Forwarded-Host header is trusted for URL generation and CSP effective_host resolution
-- [ ] 22.84 Test tenant admin first login redirects to /:tenant_slug/admin after privacy summary; regular player redirects to /:tenant_slug/
-- [ ] 22.85 Test leaderboard tiebreaker: two players with equal rating and equal games — sorted alphabetically; two players with equal rating, unequal games — higher games_played ranked first
-- [ ] 22.86 Test player card picker auto-fill: with exactly 2 active players in tenant, form opens with both slots pre-filled; with 3+ players, slots are empty and picker must be used
-- [ ] 22.87 Test tenant admin invitation email subject contains "manage"; player invitation email does not
-- [ ] 22.88 Test docker-compose.yml port bindings: verify Grafana, GlitchTip, and Prometheus ports are bound to `127.0.0.1`; verify no host port mapping exists for `/metrics`; verify `GF_SECURITY_ADMIN_PASSWORD` and `GLITCHTIP_SUPERUSER_EMAIL`/`GLITCHTIP_SUPERUSER_PASSWORD` env vars are wired through from `.env`
-- [ ] 22.89 Test setup.sh generates `GRAFANA_ADMIN_PASSWORD` and writes it to `.env`; verify it is 32+ bytes encoded; verify it is passed to Grafana as `GF_SECURITY_ADMIN_PASSWORD`
-- [ ] 22.90 Integration test for GlitchTip API automation in setup.sh: mock GlitchTip API responses; verify org, team, project creation calls are made in order; verify DSN is written to `GLITCHTIP_DSN` in `.env`; verify non-fatal behaviour when API is unavailable (warning printed, setup continues)
-- [ ] 22.56 Test audit log retention after actor deletion: delete an admin player; verify their `admin_audit_log` entries are still present with original `actor_id` intact
-- [ ] 22.57 Test audit log UI renders `[Deleted Admin]` for entries whose `actor_id` no longer resolves to a player profile
-- [ ] 22.58 Test GDPR data export includes `admin_audit_log` entries where the exporting player is the actor
-- [ ] 22.59 Test audit log cleanup: entries older than `audit_log_retention_days` are deleted by the cleanup job; entries within the window are retained; verify minimum of 90 days is enforced on the config value
-- [ ] 22.60 Test root landing page — fresh install: with no super admin in DB, GET `/` renders the "Getting started" setup instructions page containing the `./bin/zockelo eval` command
-- [ ] 22.61 Test root landing page — super admin, no tenants, unauthenticated: GET `/` renders "No leagues available yet" page
-- [ ] 22.62 Test root landing page — super admin, no tenants, authenticated as super admin: GET `/` redirects to `/admin`
-- [ ] 22.63 Test root landing page — tenants exist, unauthenticated: GET `/` renders neutral "Enter your league URL" page with slug input, regardless of tenant count (test with 1 tenant and with 3 tenants)
-- [ ] 22.64 Test root landing page — tenants exist, authenticated player: GET `/` redirects to `/:tenant_slug/`
-- [ ] 22.65 Test root landing page — tenants exist, authenticated super admin: GET `/` redirects to `/admin`
-- [ ] 22.66 Test neutral landing page slug submission: submitting a slug from the neutral page navigates to `/:slug/login`
-- [ ] 22.67 Test CI workflow structure: verify triggers — quality gate fires on PRs to `develop`/`main` and on push to `develop`, `release/**`, `hotfix/**`; `edge` image published only on `develop` push; `latest` image published only on `main` push; versioned image published only on `v*` tag push; `GITHUB_TOKEN` used for GHCR auth; all three publish jobs apply the commit SHA tag in addition to their respective named tag
+- [x] 22.1 Unit tests for Elo calculation (expected score, K-factor decay, delta application)
+- [x] 22.2 Unit tests for team balancer algorithm (all pairing combinations for 2/3/4 players)
+- [x] 22.3 Unit tests for score validation logic
+- [x] 22.4 Aggregate tests for `Game`, `Player`, `Tenant` (command → event assertions)
+- [x] 22.5 Projection tests for `PlayerRatingsProjection` (replay scenarios)
+- [x] 22.6 Integration tests for crypto-shredding (encrypt, delete key, verify graceful degradation)
+- [x] 22.7 Test data export: correct content, correct format, access control (player-only)
+- [x] 22.8 Integration tests for magic link flow (generate, verify, expiry, reuse)
+- [x] 22.9 LiveView tests for game logging form: score validation, winning condition gate, team picker (player greyed out after assignment; unblocked on slot reassignment; same player blocked in both same-team and opposing-team slots), slot correction, duplicate player_id rejected at backend
+- [x] 22.10 LiveView tests for confirmation flow (confirm, dispute, auto-confirm)
+- [x] 22.11 Test inactivity warning email sent at 30-day threshold
+- [x] 22.12 Test login cancels pending deletion and resets inactivity clock
+- [x] 22.13 Test imprint warning when mandatory fields missing
+- [x] 22.14 Test privacy notice renders controller identity from imprint fields
+- [x] 22.15 Test locale resolution order (preference → browser → fallback)
+- [x] 22.16 Test invite email sent in tenant default locale when no user preference exists
+- [x] 22.17 Test tenant isolation plug — protected routes: player from tenant A denied access to `/:tenant_b_slug/` and `/:tenant_b_slug/games` (returns 404); player who is a member of both tenants can access both dashboards
+- [x] 22.17b Test tenant isolation plug — public routes: authenticated player from tenant A can access `/:tenant_b_slug/login`, `/:tenant_b_slug/imprint`, `/:tenant_b_slug/privacy`, and `/:tenant_b_slug/join` without a 404; unauthenticated visitor can also access all four
+- [x] 22.18 Test IDOR prevention: tenant-scoped query returns 404 for cross-tenant resource access
+- [x] 22.19 Test rate limiting: magic link endpoint blocked after threshold per email and per IP
+- [x] 22.20 Test security headers present on all responses
+- [x] 22.21 Test session ID regenerated on login
+- [x] 22.22 Test admin audit log entries written for all security-sensitive actions
+- [x] 22.23 Verify all migrations include required indexes (review against performance spec)
+- [x] 22.24 Verify leaderboard query uses (tenant_id, rating DESC) index via EXPLAIN ANALYZE
+- [x] 22.25 Verify token lookup queries use unique indexes (magic_link_tokens, sessions)
+- [x] 22.26 Test `/health` endpoint: returns 200 with `{"status": "ok"}` when healthy; returns 503 with `{"status": "error", "reason": "database_unavailable"}` when DB unreachable; response body does NOT contain a `version` field; Caddy config test: `/health` path is not proxied externally
+- [x] 22.27 Test game history filtering: player filter, date range filter, combined filters, URL reflection
+- [x] 22.28 Test 404 page returned for unknown routes and tenant isolation denials
+- [x] 22.29 Test missing required env var causes fast fail with clear error message on startup
+- [x] 22.30 Test Chart.js hook mounts correctly and receives rating history data via LiveView assigns
+- [x] 22.31 LiveView test for help page rendering tenant-specific config (confirmation mode on/off, rounds to win)
+- [x] 22.32 Test unsubscribe HMAC token: valid token disables preference; invalid/tampered token rejected
+- [x] 22.33 Test maintenance banner shown when message set, dismissed per session, reappears on message change
+- [x] 22.34 Test event upcaster: V1 event replayed through projection produces same result as native V2 event
+- [x] 22.35 Test CSRF protection: POST to a form endpoint without a CSRF token returns 403; POST /unsubscribe without a session but with a valid HMAC token succeeds (CSRF exempt)
+- [x] 22.36 Test robots.txt: `GET /robots.txt` returns 200 with `Disallow: /` in body
+- [x] 22.37 Test Oban unique job constraint: enqueuing two notification jobs with the same `{worker, player_id, notification_type, trigger_id}` results in only one job in the queue
+- [x] 22.38 Test graceful shutdown: application process responds to SIGTERM and exits with code 0 within configured timeout
+- [x] 22.39 Test role revocation takes effect immediately: revoke tenant admin role, verify next request to admin panel returns 403/404 without re-login
+- [x] 22.40 Test role grant takes effect immediately: grant tenant admin role, verify next request to admin panel succeeds without re-login
+- [x] 22.41 Test constant-time token comparison: verify magic link and session token verification calls `:crypto.hash_equals/2` (inspect via code review or mock in unit test)
+- [x] 22.42 Test mass assignment: submit a form payload containing `role` and `tenant_id` extra fields; verify they are not applied to the record
+- [x] 22.43 Test CRLF injection rejection: submit an email address containing `\r\n`; verify changeset returns a validation error
+- [x] 22.44 Test dev routes unavailable outside dev: request `/dev/dashboard` in test env, verify 404
+- [x] 22.45 Test open redirect: verify relative `return_to` is honoured; verify absolute URL and `//host` values are discarded and redirect goes to dashboard
+- [x] 22.46 Test privacy notice includes: right to lodge supervisory authority complaint; explicit "no third-party recipients"; explicit "no third-country transfers"; `retention_period_days` rendered as a concrete number
+- [x] 22.47 Test email templates contain no external URLs: assert no `<img>`, `<link>`, or `<script>` src/href attributes reference an external domain in any generated email
+- [x] 22.48 Test `mix phx.digest` output: verify fingerprinted asset filenames exist in `priv/static/cache_manifest.json` after build
+- [x] 22.49 Test CLOAK_KEY rotation task: run re-encryption against test fixtures, verify all player keys decrypt correctly under the new key and fail gracefully under the old key after rotation
+- [x] 22.50 Test Elo rating floor: compute delta that would push rating below 100; verify result is clamped to 100
+- [x] 22.51 Test player self-deletion: player initiates deletion from profile settings; verify crypto-shredding flow executes, session is revoked, and deleted player cannot request a magic link
+- [x] 22.52 Test all email templates include both html_body and text_body (no HTML-only emails)
+- [x] 22.53 Test Oban queue assignment: verify each worker module declares the correct queue (`notifications`, `scheduled`, or `critical`)
+- [x] 22.54 Test `Zockelo.ReleaseTasks.create_super_admin/1`: creates super admin on first call; returns warning and no-ops on second call with same email
+- [x] 22.55 Test `setup.sh` first-install mode: run in a temp directory with Docker, curl, and openssl mocked; verify it downloads `docker-compose.yml` when absent and skips download when present; verify it writes a valid `.env` containing all required keys including `IMAGE=ghcr.io/informancer/zockelo:latest`; verify `SECRET_KEY_BASE` and `CLOAK_KEY` are non-empty base64 strings; verify existing `.env` is backed up before overwrite; verify it does not proceed if a required prompt is left blank
+- [x] 22.68 Test `setup.sh --upgrade` mode — absent and blank variables: run with a pre-existing `.env` containing one variable with a value, one absent variable, and one blank variable; provide a matching mock `.env.example`; verify the absent and blank variables are prompted for; verify the already-set variable is not prompted; verify `docker-compose.yml` is replaced and old one is backed up with timestamp; verify `docker compose pull` and `docker compose up -d` are called; verify no secret regeneration occurs
+- [x] 22.69 Test `setup.sh --upgrade` mode — all variables set: run with a pre-existing `.env` where every variable in the mock `.env.example` already has a non-empty value; verify the script runs fully non-interactively (no prompts); verify `docker compose pull` and `docker compose up -d` are still called
+- [x] 22.70 Test magic link token expiry: verify a token older than 15 minutes is rejected with an expiry error; verify a token within 15 minutes is accepted
+- [x] 22.71 Test session absolute max lifetime: create a session with `created_at` set to 8 days ago; verify the request is rejected and the player is redirected to login
+- [x] 22.72 Test point-of-collection privacy summary: first magic link verification for a new player renders the privacy summary screen; subsequent login for an already-activated player skips it and redirects directly to dashboard
+- [x] 22.73 Test privacy notice includes: how to exercise each right (Art. 15, 16, 17, 20, 21) with in-app instructions; Art. 18 restriction unavailability note; session cookie idle timeout and absolute max lifetime as concrete values; magic link token TTL (15 min) as a concrete value
+- [x] 22.74 Test supervisory authority lookup: `AT` → DSB name and URL; `FR` → CNIL; `DE` → BfDI with Germany note flag set; `GB` → ICO; unknown code → `:unknown`; nil → `:unknown`
+- [x] 22.75 Test privacy notice renders authority from current imprint country: set country to `NL`, render notice, verify Autoriteit Persoonsgegevens is shown; update country to `AT`, render again, verify DSB is shown — no app restart required
+- [x] 22.76 Test missing country shows placeholder in privacy notice and warning in admin panel
+- [x] 22.77 Test game logging winning condition: submit button disabled until team reaches rounds_to_win; enabled immediately when threshold is met
+- [x] 22.78 Test trust-mode submission feedback: after LogGame command, flash message "Game logged — ratings updated" is shown and player is on dashboard
+- [x] 22.79 Test confirmation-mode submission feedback: flash shows "Game logged — waiting for confirmation from [name]"; pending game card is visible on dashboard
+- [x] 22.80 Test player deletion voids pending games: delete a participant; verify all their pending games receive GameVoided event
+- [x] 22.81 Test config snapshot in GameLogged event: change rounds_to_win after logging a game; verify the stored event retains the original rounds_to_win value
+- [x] 22.82 Test invite link URL format: generated link follows /:tenant_slug/join?code={token} pattern
+- [x] 22.83 Test revoked invite link renders error page (not a 404 or crash)
+- [x] 22.91 Test invite link rotation: clicking Rotate shows confirmation prompt without invalidating the link; confirming invalidates the old token immediately and displays a new URL; old token returns "no longer valid" error; new token is valid
+- [x] 22.92 Test invite link expiry UI: setting an expiry date persists it; clearing returns to "No expiry"; link becomes invalid after expiry date passes
+- [x] 22.93 Test custom_domain uniqueness: saving a custom_domain already used by another tenant returns a validation error and does not update the record
+- [x] 22.94 Test magic link URL uses custom_domain when set; reverts to PHX_HOST after custom_domain is cleared
+- [x] 22.95 Test TRUST_PROXY_HEADERS=false (unset): X-Forwarded-Host header is ignored; application uses raw request host
+- [x] 22.96 Test TRUST_PROXY_HEADERS=true: X-Forwarded-Host header is trusted for URL generation and CSP effective_host resolution
+- [x] 22.84 Test tenant admin first login redirects to /:tenant_slug/admin after privacy summary; regular player redirects to /:tenant_slug/
+- [x] 22.85 Test leaderboard tiebreaker: two players with equal rating and equal games — sorted alphabetically; two players with equal rating, unequal games — higher games_played ranked first
+- [x] 22.86 Test player card picker auto-fill: with exactly 2 active players in tenant, form opens with both slots pre-filled; with 3+ players, slots are empty and picker must be used
+- [x] 22.87 Test tenant admin invitation email subject contains "manage"; player invitation email does not
+- [x] 22.88 Test docker-compose.yml port bindings: verify Grafana, GlitchTip, and Prometheus ports are bound to `127.0.0.1`; verify no host port mapping exists for `/metrics`; verify `GF_SECURITY_ADMIN_PASSWORD` and `GLITCHTIP_SUPERUSER_EMAIL`/`GLITCHTIP_SUPERUSER_PASSWORD` env vars are wired through from `.env`
+- [x] 22.89 Test setup.sh generates `GRAFANA_ADMIN_PASSWORD` and writes it to `.env`; verify it is 32+ bytes encoded; verify it is passed to Grafana as `GF_SECURITY_ADMIN_PASSWORD`
+- [x] 22.90 Integration test for GlitchTip API automation in setup.sh: mock GlitchTip API responses; verify org, team, project creation calls are made in order; verify DSN is written to `GLITCHTIP_DSN` in `.env`; verify non-fatal behaviour when API is unavailable (warning printed, setup continues)
+- [x] 22.56 Test audit log retention after actor deletion: delete an admin player; verify their `admin_audit_log` entries are still present with original `actor_id` intact
+- [x] 22.57 Test audit log UI renders `[Deleted Admin]` for entries whose `actor_id` no longer resolves to a player profile
+- [x] 22.58 Test GDPR data export includes `admin_audit_log` entries where the exporting player is the actor
+- [x] 22.59 Test audit log cleanup: entries older than `audit_log_retention_days` are deleted by the cleanup job; entries within the window are retained; verify minimum of 90 days is enforced on the config value
+- [x] 22.60 Test root landing page — fresh install: with no super admin in DB, GET `/` renders the "Getting started" setup instructions page containing the `./bin/zockelo eval` command
+- [x] 22.61 Test root landing page — super admin, no tenants, unauthenticated: GET `/` renders "No leagues available yet" page
+- [x] 22.62 Test root landing page — super admin, no tenants, authenticated as super admin: GET `/` redirects to `/admin`
+- [x] 22.63 Test root landing page — tenants exist, unauthenticated: GET `/` renders neutral "Enter your league URL" page with slug input, regardless of tenant count (test with 1 tenant and with 3 tenants)
+- [x] 22.64 Test root landing page — tenants exist, authenticated player: GET `/` redirects to `/:tenant_slug/`
+- [x] 22.65 Test root landing page — tenants exist, authenticated super admin: GET `/` redirects to `/admin`
+- [x] 22.66 Test neutral landing page slug submission: submitting a slug from the neutral page navigates to `/:slug/login`
+- [x] 22.67 Test CI workflow structure: verify triggers — quality gate fires on PRs to `develop`/`main` and on push to `develop`, `release/**`, `hotfix/**`; `edge` image published only on `develop` push; `latest` image published only on `main` push; versioned image published only on `v*` tag push; `GITHUB_TOKEN` used for GHCR auth; all three publish jobs apply the commit SHA tag in addition to their respective named tag

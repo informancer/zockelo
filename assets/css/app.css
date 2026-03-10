@@ -120,3 +120,40 @@ body {
 }
 
 /* This file is for your main application CSS */
+
+/* ============================================================
+   Accessibility — focus-visible, touch targets, reduced motion
+   ============================================================ */
+
+/* Focus ring for keyboard navigation (WCAG 2.4.11 — 3:1 contrast minimum) */
+:focus-visible {
+  outline: 2px solid oklch(70% 0.213 47.604);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Remove focus ring for mouse/touch interactions only */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Minimum 44×44px touch targets for all interactive elements (WCAG 2.5.5) */
+button,
+[role="button"],
+[role="tab"],
+[role="menuitem"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Wrap all animations and transitions in prefers-reduced-motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
