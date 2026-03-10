@@ -50,7 +50,10 @@ config :zockelo, Oban,
     Oban.Plugins.Pruner,
     {Oban.Plugins.Cron,
      crontab: [
-       {"*/15 * * * *", Zockelo.Workers.GameConfirmationWorker}
+       {"*/15 * * * *", Zockelo.Workers.GameConfirmationWorker},
+       {"0 3 * * *", Zockelo.Workers.InactiveAccountWarningWorker},
+       {"0 4 * * *", Zockelo.Workers.InactiveAccountDeletionWorker},
+       {"0 2 * * *", Zockelo.Workers.StaleRecordCleanupWorker}
      ]}
   ],
   queues: [
@@ -119,6 +122,9 @@ config :phoenix, :filter_parameters, [
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Gettext — default locale English, supported locales en + de
+config :zockelo, ZockeloWeb.Gettext, default_locale: "en", locales: ~w(en de)
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

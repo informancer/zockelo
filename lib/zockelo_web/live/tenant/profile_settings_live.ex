@@ -2,6 +2,7 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
   @moduledoc "Profile settings: /:tenant_slug/settings"
   use ZockeloWeb, :live_view
 
+  import ZockeloWeb.Gettext
   alias Zockelo.Players
   alias Zockelo.Notifications
 
@@ -73,6 +74,30 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
   # ---------------------------------------------------------------------------
   # GDPR data export
   # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # Locale / theme
+  # ---------------------------------------------------------------------------
+
+  def handle_event("update_locale", %{"locale" => locale}, socket)
+      when locale in ~w(en de) do
+    player_id = socket.assigns.current_user.player_id
+    :ok = Players.update_locale(player_id, locale)
+    {:noreply,
+     socket
+     |> assign(:current_user, %{socket.assigns.current_user | locale: locale})
+     |> put_flash(:info, gettext("Settings saved."))}
+  end
+
+  def handle_event("update_theme", %{"theme" => theme}, socket)
+      when theme in ~w(light dark system) do
+    player_id = socket.assigns.current_user.player_id
+    :ok = Players.update_theme(player_id, theme)
+    {:noreply,
+     socket
+     |> assign(:current_user, %{socket.assigns.current_user | theme: theme})
+     |> push_event("theme_changed", %{theme: theme})}
+  end
 
   # ---------------------------------------------------------------------------
   # Notification preferences
@@ -167,10 +192,42 @@ defmodule ZockeloWeb.Tenant.ProfileSettingsLive do
           <button phx-click="export_data" class="btn btn-outline">Download my data</button>
         </section>
 
+        <!-- Language -->
+        <section class="space-y-3">
+          <h2 class="font-semibold"><%= gettext("Language") %></h2>
+          <div class="flex gap-3">
+            <button phx-click="update_locale" phx-value-locale="en"
+                    class={"btn btn-sm #{if @current_user.locale == "en", do: "btn-primary", else: "btn-outline"}"}>
+              English
+            </button>
+            <button phx-click="update_locale" phx-value-locale="de"
+                    class={"btn btn-sm #{if @current_user.locale == "de", do: "btn-primary", else: "btn-outline"}"}>
+              Deutsch
+            </button>
+          </div>
+        </section>
+
+        <!-- Theme -->
+        <section class="space-y-3">
+          <h2 class="font-semibold"><%= gettext("Theme") %></h2>
+          <div class="flex gap-3">
+            <%= for theme <- ~w(light dark system) do %>
+              <button phx-click="update_theme" phx-value-theme={theme}
+                      class={"btn btn-sm #{if @current_user.theme == theme, do: "btn-primary", else: "btn-outline"}"}>
+                <%= case theme do %>
+                  <% "light" -> %><%= gettext("Light") %>
+                  <% "dark" -> %><%= gettext("Dark") %>
+                  <% _ -> %><%= gettext("System") %>
+                <% end %>
+              </button>
+            <% end %>
+          </div>
+        </section>
+
         <!-- Notifications -->
         <section class="space-y-3">
-          <h2 class="font-semibold">Notifications</h2>
-          <p class="text-sm text-gray-500">Choose which emails you receive.</p>
+          <h2 class="font-semibold"><%= gettext("Notifications") %></h2>
+          <p class="text-sm text-gray-500"><%= gettext("Choose which emails you receive.") %></p>
 
           <div class="space-y-2">
             <.notif_row type="game_logged" label="Game logged" prefs={@notification_prefs} />

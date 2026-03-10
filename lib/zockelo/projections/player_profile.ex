@@ -9,15 +9,17 @@ defmodule Zockelo.Projections.PlayerProfile do
     field :encrypted_email, :binary
     field :role, :string
     field :status, :string
-    field :theme, :string
+    field :locale, :string, default: "en"
+    field :theme, :string, default: "system"
     field :privacy_accepted_at, :utc_datetime_usec
+    field :last_login_at, :utc_datetime_usec
 
     timestamps(type: :utc_datetime_usec)
   end
 
   def changeset(struct \\ %__MODULE__{}, attrs) do
     struct
-    |> cast(attrs, [:player_id, :tenant_id, :encrypted_name, :encrypted_email, :role, :status, :theme, :privacy_accepted_at])
+    |> cast(attrs, [:player_id, :tenant_id, :encrypted_name, :encrypted_email, :role, :status, :locale, :theme, :privacy_accepted_at])
     |> validate_required([:player_id, :tenant_id, :role, :status])
   end
 end

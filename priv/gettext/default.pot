@@ -1,0 +1,263 @@
+## PO Template for default domain UI strings.
+## Run `mix gettext.extract` to update from source.
+
+## Navigation
+msgid "Dashboard"
+msgstr ""
+
+msgid "Leaderboard"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "Log out"
+msgstr ""
+
+## Auth / Login
+msgid "Sign in with a magic link"
+msgstr ""
+
+msgid "Email address"
+msgstr ""
+
+msgid "Send magic link"
+msgstr ""
+
+msgid "Check your email"
+msgstr ""
+
+msgid "We sent a sign-in link to your inbox. It expires in 15 minutes."
+msgstr ""
+
+msgid "Didn't get it? Check your spam folder or try again."
+msgstr ""
+
+msgid "Don't have an account? Ask your league admin for an invite."
+msgstr ""
+
+## Activation / Onboarding
+msgid "Welcome! Choose your display name."
+msgstr ""
+
+msgid "Your display name"
+msgstr ""
+
+msgid "Continue"
+msgstr ""
+
+msgid "Join the league"
+msgstr ""
+
+msgid "Your name"
+msgstr ""
+
+msgid "Create account"
+msgstr ""
+
+msgid "This invite link is no longer valid."
+msgstr ""
+
+msgid "Ask your league admin for a fresh link."
+msgstr ""
+
+## Privacy
+msgid "Privacy Summary"
+msgstr ""
+
+msgid "I understand and agree"
+msgstr ""
+
+## Profile Settings
+msgid "Display Name"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Change Email"
+msgstr ""
+
+msgid "A verification link will be sent to the new address."
+msgstr ""
+
+msgid "Send Link"
+msgstr ""
+
+msgid "Export My Data"
+msgstr ""
+
+msgid "Download a JSON file with your profile and game history."
+msgstr ""
+
+msgid "Download my data"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Choose which emails you receive."
+msgstr ""
+
+msgid "Game logged"
+msgstr ""
+
+msgid "Game confirmed"
+msgstr ""
+
+msgid "Game disputed"
+msgstr ""
+
+msgid "Game auto-confirmed"
+msgstr ""
+
+msgid "Admin notifications"
+msgstr ""
+
+msgid "Disputed game (admin)"
+msgstr ""
+
+msgid "New player via invite link"
+msgstr ""
+
+msgid "Inactivity warning"
+msgstr ""
+
+msgid "System notification — cannot be disabled"
+msgstr ""
+
+msgid "Delete Account"
+msgstr ""
+
+msgid "This permanently deletes your account and crypto-shreds all personal data. This cannot be undone."
+msgstr ""
+
+msgid "Yes, delete my account"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Delete my account"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "Light"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "System"
+msgstr ""
+
+## Games
+msgid "New Game"
+msgstr ""
+
+msgid "Log a Game"
+msgstr ""
+
+msgid "Team 1"
+msgstr ""
+
+msgid "Team 2"
+msgstr ""
+
+msgid "Score"
+msgstr ""
+
+msgid "Submit"
+msgstr ""
+
+msgid "Confirm"
+msgstr ""
+
+msgid "Dispute"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Confirmed"
+msgstr ""
+
+msgid "Disputed"
+msgstr ""
+
+msgid "Voided"
+msgstr ""
+
+## Leaderboard
+msgid "Rank"
+msgstr ""
+
+msgid "Player"
+msgstr ""
+
+msgid "Rating"
+msgstr ""
+
+msgid "Wins"
+msgstr ""
+
+msgid "Losses"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+## Help
+msgid "How to Play"
+msgstr ""
+
+msgid "Elo Rating"
+msgstr ""
+
+msgid "Game Confirmation"
+msgstr ""
+
+## Errors / flash
+msgid "Name cannot be blank."
+msgstr ""
+
+msgid "Email cannot be blank."
+msgstr ""
+
+msgid "Please fill in all fields."
+msgstr ""
+
+msgid "Too many attempts. Please wait and try again."
+msgstr ""
+
+msgid "Invalid magic link."
+msgstr ""
+
+msgid "This link has expired. Please request a new one."
+msgstr ""
+
+msgid "This link has already been used. Please request a new one."
+msgstr ""
+
+msgid "Account not found."
+msgstr ""
+
+msgid "Missing token."
+msgstr ""
+
+msgid "You have been logged out."
+msgstr ""
+
+msgid "Name updated."
+msgstr ""

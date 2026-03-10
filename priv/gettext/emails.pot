@@ -1,0 +1,88 @@
+## PO Template for email domain strings.
+
+msgid "[%{app}] A game has been logged"
+msgstr ""
+
+msgid "A new game has been logged in %{app}.\n\nView the game: %{url}\n\nIf you participated and the result is incorrect, dispute it from the game history page.\n\n%{footer}"
+msgstr ""
+
+msgid "<p>A new game has been logged in <strong>%{app}</strong>.</p><p><a href=\"%{url}\">View game</a></p><p>If you participated and the result is incorrect, dispute it from the game history page.</p>%{unsub}"
+msgstr ""
+
+msgid "[%{app}] Game confirmed — ratings updated"
+msgstr ""
+
+msgid "Your game in %{app} has been confirmed and ratings updated.\n\nView the game: %{url}\n\n%{footer}"
+msgstr ""
+
+msgid "<p>Your game in <strong>%{app}</strong> has been confirmed and ratings updated.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr ""
+
+msgid "[%{app}] A game result has been disputed"
+msgstr ""
+
+msgid "A game you participated in on %{app} has been disputed. A league admin will review the result.\n\nView the game: %{url}\n\n%{footer}"
+msgstr ""
+
+msgid "<p>A game you participated in on <strong>%{app}</strong> has been disputed.</p><p>A league admin will review the result and reinstate or void the game.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr ""
+
+msgid "[%{app}] Game auto-confirmed — ratings updated"
+msgstr ""
+
+msgid "Your game in %{app} was not disputed within the confirmation window and has been automatically confirmed. Ratings updated.\n\nView the game: %{url}\n\n%{footer}"
+msgstr ""
+
+msgid "<p>Your game in <strong>%{app}</strong> was not disputed and has been automatically confirmed. Ratings updated.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr ""
+
+msgid "[%{app}] Game disputed — admin review needed"
+msgstr ""
+
+msgid "A game in your %{app} league has been disputed and requires admin review.\n\nView disputed game: %{url}\nAdmin panel: %{admin}\n\n%{footer}"
+msgstr ""
+
+msgid "<p>A game in your <strong>%{app}</strong> league has been disputed and requires admin review.</p><p><a href=\"%{url}\">View disputed game</a> &middot; <a href=\"%{admin}\">Admin panel</a></p>%{unsub}"
+msgstr ""
+
+msgid "[%{app}] New player joined via invite link"
+msgstr ""
+
+msgid "A new player has registered in %{app} via the invite link.\n\nView players: %{admin}\n\n%{footer}"
+msgstr ""
+
+msgid "<p>A new player has registered in <strong>%{app}</strong> via the invite link.</p><p><a href=\"%{admin}\">View players in admin panel</a></p>%{unsub}"
+msgstr ""
+
+msgid "You've been invited to %{app}"
+msgstr ""
+
+msgid "You've been invited to join %{app}, a foosball Elo rating tracker.\n\nAccept your invitation: %{url}\n\nThis link expires in 15 minutes. If you didn't expect this, you can ignore it."
+msgstr ""
+
+msgid "<p>You've been invited to join <strong>%{app}</strong>, a foosball Elo rating tracker.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Accept invitation</a></p><p style=\"color:#6b7280;font-size:0.85em;\">This link expires in 15 minutes. If you didn't expect this, you can ignore it.</p>"
+msgstr ""
+
+msgid "You've been invited to manage %{app}"
+msgstr ""
+
+msgid "You've been invited to manage %{app} as a league admin. You can invite players, manage game disputes, and configure league settings.\n\nAccept your invitation: %{url}\n\nThis link expires in 15 minutes. If you didn't expect this, you can ignore it."
+msgstr ""
+
+msgid "<p>You've been invited to manage <strong>%{app}</strong> as a league admin.</p><p>You can invite players, manage game disputes, and configure league settings.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Accept invitation</a></p><p style=\"color:#6b7280;font-size:0.85em;\">This link expires in 15 minutes. If you didn't expect this, you can ignore it.</p>"
+msgstr ""
+
+msgid "[%{app}] League deletion has been requested"
+msgstr ""
+
+msgid "A request has been made to delete your %{app} league. All data will be permanently deleted in %{hours} hours unless cancelled by a super admin. If this was a mistake, contact your system administrator immediately."
+msgstr ""
+
+msgid "<p>A request has been made to delete your <strong>%{app}</strong> league.</p><p>All data will be permanently deleted in <strong>%{hours} hours</strong> unless cancelled by a super admin.</p><p style=\"color:#dc2626;font-weight:bold;\">If this was a mistake, contact your system administrator immediately.</p>"
+msgstr ""
+
+msgid "To stop receiving these notifications: %{url}"
+msgstr ""
+
+msgid "Unsubscribe from this notification"
+msgstr ""

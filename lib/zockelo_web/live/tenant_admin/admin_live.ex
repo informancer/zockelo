@@ -119,7 +119,9 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
     config_keys = ~w(rounds_to_win points_per_round confirmation_mode
                      auto_confirm_after_hours retention_period_days
                      notify_admin_on_invite_expiry default_locale
-                     deletion_grace_period_hours app_name custom_domain)
+                     deletion_grace_period_hours app_name custom_domain
+                     imprint_street imprint_postal_code imprint_city imprint_country_code
+                     privacy_addendum)
 
     changes =
       params
@@ -462,6 +464,50 @@ defmodule ZockeloWeb.TenantAdmin.AdminLive do
           <input type="number" name="retention_period_days" min="90"
                  value={get_in(@tenant.config, ["retention_period_days"]) || 730}
                  class="input input-bordered w-full" />
+        </div>
+
+        <!-- Imprint (§5 TMG) -->
+        <div class="pt-4 border-t">
+          <h3 class="font-semibold mb-3">Imprint (§5 TMG)</h3>
+          <%= if is_nil(get_in(@tenant.config, ["imprint_country_code"])) do %>
+            <div class="rounded bg-yellow-50 border border-yellow-200 px-3 py-2 text-sm text-yellow-700 mb-3">
+              Country code is required to generate a valid privacy notice. Please fill in all imprint fields.
+            </div>
+          <% end %>
+          <div class="grid grid-cols-1 gap-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Street address</label>
+              <input type="text" name="imprint_street" placeholder="Musterstraße 1"
+                     value={get_in(@tenant.config, ["imprint_street"]) || ""}
+                     class="input input-bordered w-full" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium mb-1">Postal code</label>
+                <input type="text" name="imprint_postal_code" placeholder="10115"
+                       value={get_in(@tenant.config, ["imprint_postal_code"]) || ""}
+                       class="input input-bordered w-full" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">City</label>
+                <input type="text" name="imprint_city" placeholder="Berlin"
+                       value={get_in(@tenant.config, ["imprint_city"]) || ""}
+                       class="input input-bordered w-full" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Country code (ISO 3166-1 alpha-2) *</label>
+              <input type="text" name="imprint_country_code" placeholder="DE" maxlength="2"
+                     value={get_in(@tenant.config, ["imprint_country_code"]) || ""}
+                     class="input input-bordered w-full uppercase" required />
+              <p class="text-xs text-gray-500 mt-1">Used to pre-populate the supervisory authority in your privacy notice.</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Privacy addendum (Markdown)</label>
+              <textarea name="privacy_addendum" rows="4" placeholder="Additional privacy information..."
+                        class="textarea textarea-bordered w-full"><%= get_in(@tenant.config, ["privacy_addendum"]) || "" %></textarea>
+            </div>
+          </div>
         </div>
 
         <.button type="submit">Save Config</.button>

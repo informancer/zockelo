@@ -1,0 +1,250 @@
+## English translations (default locale — msgstr mirrors msgid).
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Leaderboard"
+msgstr "Leaderboard"
+
+msgid "Games"
+msgstr "Games"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Help"
+msgstr "Help"
+
+msgid "Log out"
+msgstr "Log out"
+
+msgid "Sign in with a magic link"
+msgstr "Sign in with a magic link"
+
+msgid "Email address"
+msgstr "Email address"
+
+msgid "Send magic link"
+msgstr "Send magic link"
+
+msgid "Check your email"
+msgstr "Check your email"
+
+msgid "We sent a sign-in link to your inbox. It expires in 15 minutes."
+msgstr "We sent a sign-in link to your inbox. It expires in 15 minutes."
+
+msgid "Didn't get it? Check your spam folder or try again."
+msgstr "Didn't get it? Check your spam folder or try again."
+
+msgid "Don't have an account? Ask your league admin for an invite."
+msgstr "Don't have an account? Ask your league admin for an invite."
+
+msgid "Welcome! Choose your display name."
+msgstr "Welcome! Choose your display name."
+
+msgid "Your display name"
+msgstr "Your display name"
+
+msgid "Continue"
+msgstr "Continue"
+
+msgid "Join the league"
+msgstr "Join the league"
+
+msgid "Your name"
+msgstr "Your name"
+
+msgid "Create account"
+msgstr "Create account"
+
+msgid "This invite link is no longer valid."
+msgstr "This invite link is no longer valid."
+
+msgid "Ask your league admin for a fresh link."
+msgstr "Ask your league admin for a fresh link."
+
+msgid "Privacy Summary"
+msgstr "Privacy Summary"
+
+msgid "I understand and agree"
+msgstr "I understand and agree"
+
+msgid "Display Name"
+msgstr "Display Name"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Change Email"
+msgstr "Change Email"
+
+msgid "A verification link will be sent to the new address."
+msgstr "A verification link will be sent to the new address."
+
+msgid "Send Link"
+msgstr "Send Link"
+
+msgid "Export My Data"
+msgstr "Export My Data"
+
+msgid "Download a JSON file with your profile and game history."
+msgstr "Download a JSON file with your profile and game history."
+
+msgid "Download my data"
+msgstr "Download my data"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Choose which emails you receive."
+msgstr "Choose which emails you receive."
+
+msgid "Game logged"
+msgstr "Game logged"
+
+msgid "Game confirmed"
+msgstr "Game confirmed"
+
+msgid "Game disputed"
+msgstr "Game disputed"
+
+msgid "Game auto-confirmed"
+msgstr "Game auto-confirmed"
+
+msgid "Admin notifications"
+msgstr "Admin notifications"
+
+msgid "Disputed game (admin)"
+msgstr "Disputed game (admin)"
+
+msgid "New player via invite link"
+msgstr "New player via invite link"
+
+msgid "Inactivity warning"
+msgstr "Inactivity warning"
+
+msgid "System notification — cannot be disabled"
+msgstr "System notification — cannot be disabled"
+
+msgid "Delete Account"
+msgstr "Delete Account"
+
+msgid "This permanently deletes your account and crypto-shreds all personal data. This cannot be undone."
+msgstr "This permanently deletes your account and crypto-shreds all personal data. This cannot be undone."
+
+msgid "Yes, delete my account"
+msgstr "Yes, delete my account"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Delete my account"
+msgstr "Delete my account"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Theme"
+msgstr "Theme"
+
+msgid "Light"
+msgstr "Light"
+
+msgid "Dark"
+msgstr "Dark"
+
+msgid "System"
+msgstr "System"
+
+msgid "New Game"
+msgstr "New Game"
+
+msgid "Log a Game"
+msgstr "Log a Game"
+
+msgid "Team 1"
+msgstr "Team 1"
+
+msgid "Team 2"
+msgstr "Team 2"
+
+msgid "Score"
+msgstr "Score"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Confirm"
+msgstr "Confirm"
+
+msgid "Dispute"
+msgstr "Dispute"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Disputed"
+msgstr "Disputed"
+
+msgid "Voided"
+msgstr "Voided"
+
+msgid "Rank"
+msgstr "Rank"
+
+msgid "Player"
+msgstr "Player"
+
+msgid "Rating"
+msgstr "Rating"
+
+msgid "Wins"
+msgstr "Wins"
+
+msgid "Losses"
+msgstr "Losses"
+
+msgid "How to Play"
+msgstr "How to Play"
+
+msgid "Elo Rating"
+msgstr "Elo Rating"
+
+msgid "Game Confirmation"
+msgstr "Game Confirmation"
+
+msgid "Name cannot be blank."
+msgstr "Name cannot be blank."
+
+msgid "Email cannot be blank."
+msgstr "Email cannot be blank."
+
+msgid "Please fill in all fields."
+msgstr "Please fill in all fields."
+
+msgid "Too many attempts. Please wait and try again."
+msgstr "Too many attempts. Please wait and try again."
+
+msgid "Invalid magic link."
+msgstr "Invalid magic link."
+
+msgid "This link has expired. Please request a new one."
+msgstr "This link has expired. Please request a new one."
+
+msgid "This link has already been used. Please request a new one."
+msgstr "This link has already been used. Please request a new one."
+
+msgid "Account not found."
+msgstr "Account not found."
+
+msgid "Missing token."
+msgstr "Missing token."
+
+msgid "You have been logged out."
+msgstr "You have been logged out."
+
+msgid "Name updated."
+msgstr "Name updated."

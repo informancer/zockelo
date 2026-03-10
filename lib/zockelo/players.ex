@@ -210,11 +210,38 @@ defmodule Zockelo.Players do
     end
   end
 
+  @doc "Records the current login timestamp on the player profile."
+  def record_login(player_id) do
+    Repo.update_all(
+      from(p in PlayerProfile, where: p.player_id == ^player_id),
+      set: [last_login_at: DateTime.utc_now()]
+    )
+    :ok
+  end
+
   @doc "Records that a player has accepted the privacy summary."
   def accept_privacy(player_id) do
     Repo.update_all(
       from(p in PlayerProfile, where: p.player_id == ^player_id),
       set: [privacy_accepted_at: DateTime.utc_now()]
+    )
+    :ok
+  end
+
+  @doc "Updates a player's preferred locale. Accepted values: en, de."
+  def update_locale(player_id, locale) when locale in ~w(en de) do
+    Repo.update_all(
+      from(p in PlayerProfile, where: p.player_id == ^player_id),
+      set: [locale: locale]
+    )
+    :ok
+  end
+
+  @doc "Updates a player's preferred theme. Accepted values: light, dark, system."
+  def update_theme(player_id, theme) when theme in ~w(light dark system) do
+    Repo.update_all(
+      from(p in PlayerProfile, where: p.player_id == ^player_id),
+      set: [theme: theme]
     )
     :ok
   end

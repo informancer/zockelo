@@ -44,7 +44,7 @@ defmodule Zockelo.Workers.GameNotificationWorker do
 
     Enum.each(player_ids, fn player_id ->
       if Notifications.enabled?(player_id, tenant_id, notification_type) do
-        with %PlayerProfile{encrypted_email: enc} when not is_nil(enc) <-
+        with %PlayerProfile{encrypted_email: enc, locale: locale} when not is_nil(enc) <-
                Repo.get(PlayerProfile, player_id),
              {:ok, email_addr} <- Crypto.decrypt_field(player_id, enc) do
           unsub_url = Notifications.unsubscribe_url(player_id, tenant_id, notification_type)
@@ -53,7 +53,8 @@ defmodule Zockelo.Workers.GameNotificationWorker do
             app_name: app_name,
             game_url: game_url,
             reply_to: reply_to,
-            unsubscribe_url: unsub_url
+            unsubscribe_url: unsub_url,
+            locale: locale || "en"
           ]
 
           email = build_email(event_type, email_addr, opts)

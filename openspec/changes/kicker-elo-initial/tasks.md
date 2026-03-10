@@ -186,40 +186,40 @@
 ## 16. Internationalisation
 
 
-- [ ] 16.1 Configure Gettext with `en` and `de` locales; set English as system default
-- [ ] 16.2 Implement locale resolution plug: user preference → Accept-Language header → `en` fallback
-- [ ] 16.3 Add `locale` and `theme` (`light` | `dark` | `system`, default: `system`) columns to `player_profiles` read model; build locale selector and theme toggle in profile settings
-- [ ] 16.4 Add `default_locale` to tenant config schema and admin form
-- [ ] 16.5 Wrap all LiveView templates and components in `gettext` macros
-- [ ] 16.6 Wrap all error messages and validation strings in `gettext` macros
-- [ ] 16.7 Implement locale-aware email rendering: resolve locale from recipient preference → tenant default
-- [ ] 16.8 Write German (de) translations for all UI strings (`priv/gettext/de/LC_MESSAGES/default.po`)
-- [ ] 16.9 Write German (de) translations for all email templates
-- [ ] 16.10 Translate system-generated privacy notice section into German
-- [ ] 16.11 Document how to add a new locale (PO file workflow) in ops documentation
+- [x] 16.1 Configure Gettext with `en` and `de` locales; set English as system default
+- [x] 16.2 Implement locale resolution plug: user preference → Accept-Language header → `en` fallback
+- [x] 16.3 Add `locale` and `theme` (`light` | `dark` | `system`, default: `system`) columns to `player_profiles` read model; build locale selector and theme toggle in profile settings
+- [x] 16.4 Add `default_locale` to tenant config schema and admin form
+- [x] 16.5 Wrap all LiveView templates and components in `gettext` macros
+- [x] 16.6 Wrap all error messages and validation strings in `gettext` macros
+- [x] 16.7 Implement locale-aware email rendering: resolve locale from recipient preference → tenant default
+- [x] 16.8 Write German (de) translations for all UI strings (`priv/gettext/de/LC_MESSAGES/default.po`)
+- [x] 16.9 Write German (de) translations for all email templates
+- [x] 16.10 Translate system-generated privacy notice section into German
+- [x] 16.11 Document how to add a new locale (PO file workflow) in ops documentation
 
 ## 17. Data Retention and Cookie Compliance
 
-- [ ] 17.1 Add `last_login_at` column to `player_profiles` read model, update on every successful magic link authentication
-- [ ] 17.2 Add `retention_period_days` (default: 730) to tenant config schema and admin form
-- [ ] 17.3 Implement `InactiveAccountWarningWorker` Oban job: find players within 30 days of retention threshold, send warning email
-- [ ] 17.4 Implement `InactiveAccountDeletionWorker` Oban job: find players past retention threshold with elapsed warning period, trigger crypto-shredding deletion flow
-- [ ] 17.5 Implement login-resets-clock: update `last_login_at` and cancel pending deletion job on successful authentication
-- [ ] 17.6 Write warning email template (plain text + HTML) using relative time ("your account will be deleted in 30 days") rather than an absolute date, plus a login link
-- [ ] 17.7 Add session cookie documentation to system-generated privacy notice section (name, purpose, lifetime)
-- [ ] 17.8 Add self-hosted DPA note to operator documentation (README or docs/)
-- [ ] 17.9 Implement `StaleRecordCleanupWorker` Oban job (daily): delete expired `magic_link_tokens`, `invite_links`, and `sessions` by `expires_at`; delete `admin_audit_log` entries older than `audit_log_retention_days` system config value
+- [x] 17.1 Add `last_login_at` column to `player_profiles` read model, update on every successful magic link authentication
+- [x] 17.2 Add `retention_period_days` (default: 730) to tenant config schema and admin form
+- [x] 17.3 Implement `InactiveAccountWarningWorker` Oban job: find players within 30 days of retention threshold, send warning email
+- [x] 17.4 Implement `InactiveAccountDeletionWorker` Oban job: find players past retention threshold with elapsed warning period, trigger crypto-shredding deletion flow
+- [x] 17.5 Implement login-resets-clock: update `last_login_at` and cancel pending deletion job on successful authentication
+- [x] 17.6 Write warning email template (plain text + HTML) using relative time ("your account will be deleted in 30 days") rather than an absolute date, plus a login link
+- [x] 17.7 Add session cookie documentation to system-generated privacy notice section (name, purpose, lifetime)
+- [x] 17.8 Add self-hosted DPA note to operator documentation (README or docs/)
+- [x] 17.9 Implement `StaleRecordCleanupWorker` Oban job (daily): delete expired `magic_link_tokens`, `invite_links`, and `sessions` by `expires_at`; delete `admin_audit_log` entries older than `audit_log_retention_days` system config value
 
 ## 18. Legal Pages
 
-- [ ] 18.1 Add imprint fields to tenant config schema (mandatory + optional fields per §5 TMG); address stored as four discrete DB columns: `street`, `postal_code`, `city`, `country_code` (ISO 3166-1 alpha-2); `country_code` is mandatory and validated; warn in admin panel separately when `country_code` is missing
-- [ ] 18.2 Build imprint config form in tenant admin panel: standard text inputs for street, postal code, city; country as a dropdown (ISO 3166-1 alpha-2 list with display names); mandatory field validation warning; note under country field: "Used to pre-populate the supervisory authority in your privacy notice"
-- [ ] 18.3 Build public imprint LiveView: `/:tenant_slug/imprint` (no auth required)
-- [ ] 18.4 Build system-generated privacy notice LiveView: `/:tenant_slug/privacy` (no auth required), populated from imprint + fixed processing description
-- [ ] 18.5 Build privacy addendum config field in tenant admin panel (Markdown input); render via `earmark` + `html_sanitize_ex` on the public privacy page
-- [ ] 18.6 Add footer component with imprint and privacy links, include on all layouts including unauthenticated
-- [ ] 18.7 Update system-generated privacy notice template to include: right to lodge a complaint with a supervisory authority (Art. 13(2)(d)); explicit "no third-party recipients"; explicit "no third-country transfers"; retention period shown as the actual `retention_period_days` value in days
-- [ ] 18.8 Implement supervisory authority lookup module: static map of ISO 3166-1 alpha-2 country codes → `{name, url}`; covers all EU/EEA member states + `GB` (ICO); `DE` maps to BfDI with a `germany_note: true` flag so the template can render the Länder caveat; unknown or nil country returns `:unknown`; privacy notice template renders authority name+URL, Germany note, or placeholder accordingly; privacy notice derives authority live from current `country_code` — no caching
+- [x] 18.1 Add imprint fields to tenant config schema (mandatory + optional fields per §5 TMG); address stored as four discrete DB columns: `street`, `postal_code`, `city`, `country_code` (ISO 3166-1 alpha-2); `country_code` is mandatory and validated; warn in admin panel separately when `country_code` is missing
+- [x] 18.2 Build imprint config form in tenant admin panel: standard text inputs for street, postal code, city; country as a dropdown (ISO 3166-1 alpha-2 list with display names); mandatory field validation warning; note under country field: "Used to pre-populate the supervisory authority in your privacy notice"
+- [x] 18.3 Build public imprint LiveView: `/:tenant_slug/imprint` (no auth required)
+- [x] 18.4 Build system-generated privacy notice LiveView: `/:tenant_slug/privacy` (no auth required), populated from imprint + fixed processing description
+- [x] 18.5 Build privacy addendum config field in tenant admin panel (Markdown input); render via `earmark` + `html_sanitize_ex` on the public privacy page
+- [x] 18.6 Add footer component with imprint and privacy links, include on all layouts including unauthenticated
+- [x] 18.7 Update system-generated privacy notice template to include: right to lodge a complaint with a supervisory authority (Art. 13(2)(d)); explicit "no third-party recipients"; explicit "no third-country transfers"; retention period shown as the actual `retention_period_days` value in days
+- [x] 18.8 Implement supervisory authority lookup module: static map of ISO 3166-1 alpha-2 country codes → `{name, url}`; covers all EU/EEA member states + `GB` (ICO); `DE` maps to BfDI with a `germany_note: true` flag so the template can render the Länder caveat; unknown or nil country returns `:unknown`; privacy notice template renders authority name+URL, Germany note, or placeholder accordingly; privacy notice derives authority live from current `country_code` — no caching
 
 ## 19. Observability and Deployment
 

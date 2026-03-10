@@ -1,0 +1,100 @@
+## German (de) email translations.
+msgid ""
+msgstr ""
+"Language: de\n"
+
+msgid "[%{app}] A game has been logged"
+msgstr "[%{app}] Ein Spiel wurde eingetragen"
+
+msgid "A new game has been logged in %{app}.\n\nView the game: %{url}\n\nIf you participated and the result is incorrect, dispute it from the game history page.\n\n%{footer}"
+msgstr "In %{app} wurde ein neues Spiel eingetragen.\n\nSpiel ansehen: %{url}\n\nWenn du teilgenommen hast und das Ergebnis falsch ist, kannst du es über die Spielhistorie anfechten.\n\n%{footer}"
+
+msgid "<p>A new game has been logged in <strong>%{app}</strong>.</p><p><a href=\"%{url}\">View game</a></p><p>If you participated and the result is incorrect, dispute it from the game history page.</p>%{unsub}"
+msgstr "<p>In <strong>%{app}</strong> wurde ein neues Spiel eingetragen.</p><p><a href=\"%{url}\">Spiel ansehen</a></p><p>Wenn du teilgenommen hast und das Ergebnis falsch ist, kannst du es über die Spielhistorie anfechten.</p>%{unsub}"
+
+msgid "[%{app}] Game confirmed — ratings updated"
+msgstr "[%{app}] Spiel bestätigt – Wertungen aktualisiert"
+
+msgid "Your game in %{app} has been confirmed and ratings updated.\n\nView the game: %{url}\n\n%{footer}"
+msgstr "Dein Spiel in %{app} wurde bestätigt und die Wertungen wurden aktualisiert.\n\nSpiel ansehen: %{url}\n\n%{footer}"
+
+msgid "<p>Your game in <strong>%{app}</strong> has been confirmed and ratings updated.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr "<p>Dein Spiel in <strong>%{app}</strong> wurde bestätigt und die Wertungen aktualisiert.</p><p><a href=\"%{url}\">Spiel ansehen</a></p>%{unsub}"
+
+msgid "[%{app}] A game result has been disputed"
+msgstr "[%{app}] Ein Spielergebnis wurde angefochten"
+
+msgid "A game you participated in on %{app} has been disputed. A league admin will review the result.\n\nView the game: %{url}\n\n%{footer}"
+msgstr "Ein Spiel, an dem du in %{app} teilgenommen hast, wurde angefochten. Ein Liga-Admin wird das Ergebnis prüfen.\n\nSpiel ansehen: %{url}\n\n%{footer}"
+
+msgid "<p>A game you participated in on <strong>%{app}</strong> has been disputed.</p><p>A league admin will review the result and reinstate or void the game.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr "<p>Ein Spiel, an dem du in <strong>%{app}</strong> teilgenommen hast, wurde angefochten.</p><p>Ein Liga-Admin wird das Ergebnis prüfen und das Spiel bestätigen oder annullieren.</p><p><a href=\"%{url}\">Spiel ansehen</a></p>%{unsub}"
+
+msgid "[%{app}] Game auto-confirmed — ratings updated"
+msgstr "[%{app}] Spiel automatisch bestätigt – Wertungen aktualisiert"
+
+msgid "Your game in %{app} was not disputed within the confirmation window and has been automatically confirmed. Ratings updated.\n\nView the game: %{url}\n\n%{footer}"
+msgstr "Dein Spiel in %{app} wurde nicht angefochten und automatisch bestätigt. Wertungen wurden aktualisiert.\n\nSpiel ansehen: %{url}\n\n%{footer}"
+
+msgid "<p>Your game in <strong>%{app}</strong> was not disputed and has been automatically confirmed. Ratings updated.</p><p><a href=\"%{url}\">View game</a></p>%{unsub}"
+msgstr "<p>Dein Spiel in <strong>%{app}</strong> wurde nicht angefochten und automatisch bestätigt. Wertungen wurden aktualisiert.</p><p><a href=\"%{url}\">Spiel ansehen</a></p>%{unsub}"
+
+msgid "[%{app}] Game disputed — admin review needed"
+msgstr "[%{app}] Spiel angefochten – Admin-Prüfung erforderlich"
+
+msgid "A game in your %{app} league has been disputed and requires admin review.\n\nView disputed game: %{url}\nAdmin panel: %{admin}\n\n%{footer}"
+msgstr "Ein Spiel in deiner %{app}-Liga wurde angefochten und erfordert eine Admin-Prüfung.\n\nAngefochtenes Spiel: %{url}\nAdmin-Panel: %{admin}\n\n%{footer}"
+
+msgid "<p>A game in your <strong>%{app}</strong> league has been disputed and requires admin review.</p><p><a href=\"%{url}\">View disputed game</a> &middot; <a href=\"%{admin}\">Admin panel</a></p>%{unsub}"
+msgstr "<p>Ein Spiel in deiner <strong>%{app}</strong>-Liga wurde angefochten und erfordert eine Admin-Prüfung.</p><p><a href=\"%{url}\">Angefochtenes Spiel</a> &middot; <a href=\"%{admin}\">Admin-Panel</a></p>%{unsub}"
+
+msgid "[%{app}] New player joined via invite link"
+msgstr "[%{app}] Neuer Spieler über Einladungslink beigetreten"
+
+msgid "A new player has registered in %{app} via the invite link.\n\nView players: %{admin}\n\n%{footer}"
+msgstr "Ein neuer Spieler hat sich in %{app} über den Einladungslink registriert.\n\nSpieler ansehen: %{admin}\n\n%{footer}"
+
+msgid "<p>A new player has registered in <strong>%{app}</strong> via the invite link.</p><p><a href=\"%{admin}\">View players in admin panel</a></p>%{unsub}"
+msgstr "<p>Ein neuer Spieler hat sich in <strong>%{app}</strong> über den Einladungslink registriert.</p><p><a href=\"%{admin}\">Spieler im Admin-Panel ansehen</a></p>%{unsub}"
+
+msgid "You've been invited to %{app}"
+msgstr "Du wurdest zu %{app} eingeladen"
+
+msgid "You've been invited to join %{app}, a foosball Elo rating tracker.\n\nAccept your invitation: %{url}\n\nThis link expires in 15 minutes. If you didn't expect this, you can ignore it."
+msgstr "Du wurdest eingeladen, %{app} beizutreten, einem Kicker-Elo-Tracker.\n\nEinladung annehmen: %{url}\n\nDieser Link läuft in 15 Minuten ab. Falls du diese Einladung nicht erwartet hast, kannst du sie ignorieren."
+
+msgid "<p>You've been invited to join <strong>%{app}</strong>, a foosball Elo rating tracker.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Accept invitation</a></p><p style=\"color:#6b7280;font-size:0.85em;\">This link expires in 15 minutes. If you didn't expect this, you can ignore it.</p>"
+msgstr "<p>Du wurdest eingeladen, <strong>%{app}</strong> beizutreten, einem Kicker-Elo-Tracker.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Einladung annehmen</a></p><p style=\"color:#6b7280;font-size:0.85em;\">Dieser Link läuft in 15 Minuten ab. Falls du diese Einladung nicht erwartet hast, kannst du sie ignorieren.</p>"
+
+msgid "You've been invited to manage %{app}"
+msgstr "Du wurdest eingeladen, %{app} zu verwalten"
+
+msgid "You've been invited to manage %{app} as a league admin. You can invite players, manage game disputes, and configure league settings.\n\nAccept your invitation: %{url}\n\nThis link expires in 15 minutes. If you didn't expect this, you can ignore it."
+msgstr "Du wurdest eingeladen, %{app} als Liga-Admin zu verwalten. Du kannst Spieler einladen, Spielstreitigkeiten bearbeiten und Liga-Einstellungen konfigurieren.\n\nEinladung annehmen: %{url}\n\nDieser Link läuft in 15 Minuten ab. Falls du diese Einladung nicht erwartet hast, kannst du sie ignorieren."
+
+msgid "<p>You've been invited to manage <strong>%{app}</strong> as a league admin.</p><p>You can invite players, manage game disputes, and configure league settings.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Accept invitation</a></p><p style=\"color:#6b7280;font-size:0.85em;\">This link expires in 15 minutes. If you didn't expect this, you can ignore it.</p>"
+msgstr "<p>Du wurdest eingeladen, <strong>%{app}</strong> als Liga-Admin zu verwalten.</p><p>Du kannst Spieler einladen, Spielstreitigkeiten bearbeiten und Liga-Einstellungen konfigurieren.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Einladung annehmen</a></p><p style=\"color:#6b7280;font-size:0.85em;\">Dieser Link läuft in 15 Minuten ab. Falls du diese Einladung nicht erwartet hast, kannst du sie ignorieren.</p>"
+
+msgid "[%{app}] League deletion has been requested"
+msgstr "[%{app}] Liga-Löschung wurde beantragt"
+
+msgid "A request has been made to delete your %{app} league. All data will be permanently deleted in %{hours} hours unless cancelled by a super admin. If this was a mistake, contact your system administrator immediately."
+msgstr "Es wurde beantragt, deine %{app}-Liga zu löschen. Alle Daten werden in %{hours} Stunden unwiderruflich gelöscht, sofern ein Super-Admin den Vorgang nicht abbricht. Falls dies ein Fehler war, wende dich sofort an deinen Systemadministrator."
+
+msgid "<p>A request has been made to delete your <strong>%{app}</strong> league.</p><p>All data will be permanently deleted in <strong>%{hours} hours</strong> unless cancelled by a super admin.</p><p style=\"color:#dc2626;font-weight:bold;\">If this was a mistake, contact your system administrator immediately.</p>"
+msgstr "<p>Es wurde beantragt, deine <strong>%{app}</strong>-Liga zu löschen.</p><p>Alle Daten werden in <strong>%{hours} Stunden</strong> unwiderruflich gelöscht, sofern ein Super-Admin den Vorgang nicht abbricht.</p><p style=\"color:#dc2626;font-weight:bold;\">Falls dies ein Fehler war, wende dich sofort an deinen Systemadministrator.</p>"
+
+msgid "[%{app}] Your account will be deleted in %{days} days"
+msgstr "[%{app}] Dein Konto wird in %{days} Tagen gelöscht"
+
+msgid "Your account in %{app} has been inactive for a long time.\n\nYour account will be permanently deleted in %{days} days unless you sign in.\n\nSign in to keep your account: %{url}"
+msgstr "Dein Konto in %{app} war lange inaktiv.\n\nDein Konto wird in %{days} Tagen unwiderruflich gelöscht, sofern du dich nicht anmeldest.\n\nJetzt anmelden und Konto behalten: %{url}"
+
+msgid "<p>Your account in <strong>%{app}</strong> has been inactive for a long time.</p><p>Your account will be permanently deleted in <strong>%{days} days</strong> unless you sign in.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Sign in to keep your account</a></p>"
+msgstr "<p>Dein Konto in <strong>%{app}</strong> war lange inaktiv.</p><p>Dein Konto wird in <strong>%{days} Tagen</strong> unwiderruflich gelöscht, sofern du dich nicht anmeldest.</p><p><a href=\"%{url}\" style=\"display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Jetzt anmelden und Konto behalten</a></p>"
+
+msgid "To stop receiving these notifications: %{url}"
+msgstr "Um diese Benachrichtigungen zu deaktivieren: %{url}"
+
+msgid "Unsubscribe from this notification"
+msgstr "Von dieser Benachrichtigung abmelden"

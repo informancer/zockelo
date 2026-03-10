@@ -17,6 +17,8 @@ defmodule ZockeloWeb.AuthController do
          {:ok, session} <- Auth.create_session(player_id, profile.tenant_id) do
       destination = return_to || post_login_path(profile, tenant)
 
+      Players.record_login(player_id)
+
       conn
       |> configure_session(renew: true)
       |> put_session("session_id", session.id)

@@ -10,6 +10,7 @@ defmodule ZockeloWeb.Router do
     plug :put_secure_browser_headers
     plug ZockeloWeb.Plugs.SecurityHeadersPlug
     plug ZockeloWeb.Plugs.LoadSessionPlug
+    plug ZockeloWeb.Plugs.LocalePlug
   end
 
   # Requires an active session; redirects to login otherwise.
@@ -86,6 +87,8 @@ defmodule ZockeloWeb.Router do
 
     live "/login", LoginLive
     live "/join", JoinLive
+    live "/imprint", ImprintLive
+    live "/privacy", PrivacyLive
   end
 
   # Tenant pages — /:tenant_slug/*
